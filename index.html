@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepL SDR Team Dashboard — Q1 FY26</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:#f8fafc;color:#1e293b;line-height:1.5}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 60px}
+  
+  /* Header */
+  .header{text-align:center;margin-bottom:32px}
+  .header h1{font-size:22px;font-weight:800;color:#0F4C81;letter-spacing:-0.5px}
+  .header .meta{font-size:13px;color:#64748b;margin-top:4px}
+  .header .week-badge{display:inline-block;background:#0F4C81;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-top:8px}
+
+  /* Section headings */
+  .section{margin-top:36px}
+  .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;border-bottom:2px solid #e2e8f0;padding-bottom:8px}
+  .section-title{font-size:15px;font-weight:800;color:#0F4C81;text-transform:uppercase;letter-spacing:0.5px}
+  .section-sub{font-size:12px;color:#94a3b8;font-weight:500}
+
+  /* KPI cards */
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .kpi{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;position:relative;overflow:hidden}
+  .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+  .kpi.blue::before{background:#0F4C81} .kpi.green::before{background:#16a34a} .kpi.amber::before{background:#d97706} .kpi.red::before{background:#dc2626}
+  .kpi-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px}
+  .kpi-value{font-size:24px;font-weight:800;color:#0f172a;margin:4px 0 2px}
+  .kpi-target{font-size:11px;color:#94a3b8}
+  .kpi-delta{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:6px}
+  .kpi-delta.up{background:#f0fdf4;color:#16a34a} .kpi-delta.down{background:#fef2f2;color:#dc2626} .kpi-delta.flat{background:#f1f5f9;color:#64748b}
+
+  /* SDR selector */
+  .selector-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .selector-row label{font-size:13px;font-weight:700;color:#0F4C81}
+  .selector-row select{font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 14px;border:2px solid #0F4C81;border-radius:8px;background:#fff;color:#0f172a;cursor:pointer;min-width:220px}
+  .selector-row select:focus{outline:none;box-shadow:0 0 0 3px rgba(15,76,129,0.15)}
+
+  /* Personal section */
+  .personal{display:none}
+  .personal.active{display:block}
+  .personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.personal-grid{grid-template-columns:1fr}}
+  .personal-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;position:relative}
+  .personal-card h3{font-size:13px;font-weight:700;color:#0F4C81;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.3px}
+  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9}
+  .metric-row:last-child{border-bottom:none}
+  .metric-label{font-size:12px;color:#64748b}
+  .metric-val{font-size:14px;font-weight:700;color:#0f172a}
+  .metric-val.green{color:#16a34a} .metric-val.amber{color:#d97706} .metric-val.red{color:#dc2626}
+
+  /* Progress bar */
+  .prog-wrap{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:6px}
+  .prog-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+
+  /* Sparkline area */
+  .spark-canvas{width:100%;height:150px;margin-top:8px}
+
+  /* Highlights */
+  .highlights-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .highlight-card{background:linear-gradient(135deg,#0F4C81 0%,#1e6db5 100%);color:#fff;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+  .highlight-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.06);border-radius:50%}
+  .highlight-emoji{font-size:22px;margin-bottom:6px}
+  .highlight-name{font-size:11px;font-weight:500;opacity:0.8}
+  .highlight-title{font-size:14px;font-weight:800;margin:2px 0}
+  .highlight-stat{font-size:16px;font-weight:800;color:#93c5fd;margin:4px 0}
+  .highlight-detail{font-size:10px;opacity:0.7;line-height:1.4}
+
+  /* Leaderboard */
+  .lb-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:700px){.lb-grid{grid-template-columns:1fr}}
+  .lb-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;overflow:hidden}
+  .lb-card h3{font-size:13px;font-weight:700;color:#0F4C81;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.3px}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9}
+  .lb-row:last-child{border-bottom:none}
+  .lb-rank{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+  .lb-rank.gold{background:#fef3c7;color:#92400e} .lb-rank.silver{background:#f1f5f9;color:#475569} .lb-rank.bronze{background:#fed7aa;color:#9a3412} .lb-rank.other{background:#f8fafc;color:#94a3b8}
+  .lb-name{font-size:12px;font-weight:600;color:#334155;flex:1}
+  .lb-val{font-size:13px;font-weight:800;color:#0f172a}
+  .lb-bu{font-size:10px;color:#94a3b8;margin-left:auto}
+
+  /* Focus callout */
+  .focus-box{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1px solid #bfdbfe;border-radius:12px;padding:20px 22px;position:relative;overflow:hidden}
+  .focus-box::before{content:'🎯';position:absolute;top:-8px;right:12px;font-size:48px;opacity:0.12}
+  .focus-title{font-size:14px;font-weight:800;color:#1e40af;margin-bottom:6px}
+  .focus-text{font-size:13px;color:#1e3a5f;line-height:1.7}
+  .focus-stat{font-weight:800;color:#0F4C81}
+
+  /* Chart area */
+  .chart-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:12px}
+  .chart-title{font-size:13px;font-weight:700;color:#0F4C81;margin-bottom:4px}
+  .chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .chart-legend span{font-size:10px;color:#64748b;display:flex;align-items:center;gap:4px}
+  .chart-legend span::before{content:'';width:10px;height:10px;border-radius:2px;display:inline-block}
+
+  /* WoW banner */
+  .wow-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+  .wow-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;text-align:center}
+  .wow-label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px}
+  .wow-val{font-size:18px;font-weight:800;color:#0f172a;margin:2px 0}
+  .wow-delta{font-size:11px;font-weight:700}
+  .wow-delta.up{color:#16a34a} .wow-delta.down{color:#dc2626} .wow-delta.flat{color:#64748b}
+  .section.tight{margin-top:12px}
+
+  /* Footer */
+  .footer{text-align:center;margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <h1>🏆 SDR Team Scoreboard</h1>
+  <div class="meta" id="headerMeta"></div>
+  <div class="week-badge" id="weekBadge"></div>
+</div>
+
+<!-- ═══ TEAM SCOREBOARD ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">Team Scoreboard</div><div class="section-sub">How we're tracking as a global SDR org</div></div>
+  <div class="kpi-row" id="teamKPIs"></div>
+  <div class="wow-strip" id="wowStrip"></div>
+</div>
+
+<!-- ═══ FOCUS OF THE WEEK ═══ -->
+<div class="section tight">
+  <div id="focusBox"></div>
+</div>
+
+<!-- ═══ MY PERFORMANCE ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">My Performance</div><div class="section-sub">Select your name to see where you stand</div></div>
+  <div class="selector-row">
+    <label for="sdrSelect">👤 I am:</label>
+    <select id="sdrSelect"><option value="">Select your name…</option></select>
+  </div>
+  <div class="personal" id="personalSection">
+    <div class="personal-grid">
+      <div class="personal-card" id="myTargets"></div>
+      <div class="personal-card" id="myActivity"></div>
+    </div>
+    <div class="personal-grid" style="margin-top:12px">
+      <div class="personal-card"><h3>📈 My Pipeline Trend</h3><canvas class="spark-canvas" id="myPipeChart"></canvas></div>
+      <div class="personal-card"><h3>📊 My Activity Trend</h3><canvas class="spark-canvas" id="myActChart"></canvas></div>
+    </div>
+    <div class="personal-card" style="margin-top:12px" id="myRunRate"></div>
+  </div>
+</div>
+
+<!-- ═══ HIGHLIGHTS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">🌟 This Week's Stars</div><div class="section-sub">Celebrating standout performances</div></div>
+  <div class="highlights-row" id="highlights"></div>
+</div>
+
+<!-- ═══ LEADERBOARDS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">Leaderboards</div><div class="section-sub">This week's top producers</div></div>
+  <div class="lb-grid" id="leaderboards"></div>
+</div>
+
+<!-- ═══ TEAM TRENDS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">Team Momentum</div><div class="section-sub">Weekly output across the global org</div></div>
+  <div class="chart-wrap">
+    <div class="chart-title" id="pipeChartTitle">Pipeline Added Per Week</div>
+    <div class="chart-legend" id="pipeChartLegend"></div>
+    <canvas id="pipeBarChart" height="220"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title" id="actChartTitle">Activities Per Week</div>
+    <div class="chart-legend" id="actChartLegend"></div>
+    <canvas id="actBarChart" height="220"></canvas>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="footer" id="footer"></div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DATA — identical to management dashboards, updated weekly
+// ════════════════════════════════════════════════════════════
+const WEEK = { ending: '2026-02-19', number: 7, weeksElapsed: 7, totalWeeks: 13, weeksRemaining: 6 };
+
+const BU_META = {
+  DACH_ENT_OB: { label:'DACH Enterprise OB', short:'DACH ENT', color:'#0F4C81', hcTarget:6 },
+  DACH_CORP_OB:{ label:'DACH Corporate OB', short:'DACH CORP', color:'#2563eb', hcTarget:5 },
+  EMEA_OB:     { label:'EMEA Outbound', short:'EMEA OB', color:'#F18F01', hcTarget:7 },
+  AMER_OB:     { label:'AMER Outbound', short:'AMER OB', color:'#7B2D8E', hcTarget:7 },
+  APJ_OB:      { label:'APJ Outbound', short:'APJ OB', color:'#C73E1D', hcTarget:8 },
+  INBOUND:     { label:'Inbound', short:'Inbound', color:'#64748b', hcTarget:10 },
+};
+
+const MONTHLY_PIPE_TARGETS = {
+  'Malvina Muraccioli':{jan:100000,feb:130000,mar:150000},'Loic Hermabessiere':{jan:100000,feb:130000,mar:150000},
+  'Marva Hakimi':{jan:50000,feb:97000,mar:150000},'Casey Arra':{jan:38000,feb:73000,mar:112000},
+  'Matthew Salisbury':{jan:75000,feb:130000,mar:150000},'Johannes Hounsgaard':{jan:130000,feb:168000,mar:194000},
+  'Lucas Durst':{jan:130000,feb:168000,mar:194000},'Burak Ayten':{jan:130000,feb:168000,mar:194000},
+  'Julian Spretz':{jan:130000,feb:168000,mar:194000},'Armin Oesterwind':{jan:130000,feb:168000,mar:194000},
+  'Julia Laura Damrath':{jan:0,feb:84000,mar:146000},'Fabio Ferrauti':{jan:100000,feb:130000,mar:150000},
+  'Philip Croes':{jan:100000,feb:130000,mar:150000},'Giulio Sudano':{jan:50000,feb:97000,mar:150000},
+  'Salma Geaissa':{jan:0,feb:65000,mar:112000},'Andrew Moher':{jan:99466,feb:143967,mar:182889},
+  'Tyler Escamilla':{jan:114466,feb:162967,mar:204889},'Richard Lam':{jan:99466,feb:143967,mar:182889},
+  'Gracie Haskell':{jan:57233,feb:122725,mar:204889},'Ryuya Tanida':{jan:136274,feb:176657,mar:203911},
+  'Chisako Nukui':{jan:161274,feb:209657,mar:241911},'Kai Nakamichi':{jan:161274,feb:209657,mar:241911},
+  'Kaho Mizumachi':{jan:136274,feb:176657,mar:203911},'Sho Nakazawa':{jan:161274,feb:209657,mar:241911},
+  'Kelly Sito':{jan:0,feb:0,mar:0},'Lucas Schmalzl':{jan:187000,feb:243000,mar:280000},
+  'Oisin Flynn':{jan:204000,feb:265000,mar:306000},'Ying Hong':{jan:125000,feb:243000,mar:373000},
+};
+
+const MONTHLY_SAO_TARGETS = {
+  'Malvina Muraccioli':{jan:8,feb:10,mar:12},'Loic Hermabessiere':{jan:6,feb:8,mar:9},
+  'Marva Hakimi':{jan:4,feb:6,mar:9},'Casey Arra':{jan:3,feb:6,mar:9},
+  'Matthew Salisbury':{jan:4,feb:8,mar:9},'Johannes Hounsgaard':{jan:6,feb:8,mar:9},
+  'Lucas Durst':{jan:6,feb:8,mar:9},'Burak Ayten':{jan:6,feb:8,mar:9},
+  'Julian Spretz':{jan:6,feb:8,mar:9},'Armin Oesterwind':{jan:6,feb:8,mar:9},
+  'Julia Laura Damrath':{jan:0,feb:4,mar:7},'Fabio Ferrauti':{jan:7,feb:9,mar:10},
+  'Philip Croes':{jan:7,feb:9,mar:10},'Giulio Sudano':{jan:3,feb:6,mar:10},
+  'Salma Geaissa':{jan:0,feb:4,mar:7},'Andrew Moher':{jan:9,feb:13,mar:17},
+  'Tyler Escamilla':{jan:10,feb:15,mar:18},'Richard Lam':{jan:9,feb:13,mar:17},
+  'Gracie Haskell':{jan:5,feb:11,mar:18},'Ryuya Tanida':{jan:11,feb:15,mar:17},
+  'Chisako Nukui':{jan:13,feb:17,mar:20},'Kai Nakamichi':{jan:13,feb:17,mar:20},
+  'Kaho Mizumachi':{jan:11,feb:15,mar:17},'Sho Nakazawa':{jan:13,feb:17,mar:20},
+  'Kelly Sito':{jan:0,feb:0,mar:0},'Lucas Schmalzl':{jan:11,feb:14,mar:17},
+  'Oisin Flynn':{jan:13,feb:16,mar:19},'Ying Hong':{jan:7,feb:14,mar:21},
+};
+
+const SDR_ROSTER = {
+  'Malvina Muraccioli':{bu:'EMEA_OB',region:'EMEA'},'Loic Hermabessiere':{bu:'EMEA_OB',region:'EMEA'},
+  'Marva Hakimi':{bu:'EMEA_OB',region:'EMEA'},'Casey Arra':{bu:'EMEA_OB',region:'EMEA'},
+  'Matthew Salisbury':{bu:'EMEA_OB',region:'EMEA'},
+  'Johannes Hounsgaard':{bu:'DACH_ENT_OB',region:'DACH'},'Lucas Durst':{bu:'DACH_ENT_OB',region:'DACH'},
+  'Burak Ayten':{bu:'DACH_ENT_OB',region:'DACH'},'Julian Spretz':{bu:'DACH_ENT_OB',region:'DACH'},
+  'Armin Oesterwind':{bu:'DACH_ENT_OB',region:'DACH'},'Julia Laura Damrath':{bu:'DACH_ENT_OB',region:'DACH'},
+  'Fabio Ferrauti':{bu:'DACH_CORP_OB',region:'DACH'},'Philip Croes':{bu:'DACH_CORP_OB',region:'DACH'},
+  'Giulio Sudano':{bu:'DACH_CORP_OB',region:'DACH'},'Salma Geaissa':{bu:'DACH_CORP_OB',region:'DACH'},
+  'Andrew Moher':{bu:'AMER_OB',region:'AMER'},'Tyler Escamilla':{bu:'AMER_OB',region:'AMER'},
+  'Richard Lam':{bu:'AMER_OB',region:'AMER'},'Gracie Haskell':{bu:'AMER_OB',region:'AMER'},
+  'Ryuya Tanida':{bu:'APJ_OB',region:'APJ'},'Chisako Nukui':{bu:'APJ_OB',region:'APJ'},
+  'Kai Nakamichi':{bu:'APJ_OB',region:'APJ'},'Kaho Mizumachi':{bu:'APJ_OB',region:'APJ'},
+  'Sho Nakazawa':{bu:'APJ_OB',region:'APJ'},'Kelly Sito':{bu:'APJ_OB',region:'APJ'},
+  'Lucas Schmalzl':{bu:'INBOUND',region:'DACH'},'Oisin Flynn':{bu:'INBOUND',region:'EMEA'},
+  'Ying Hong':{bu:'INBOUND',region:'DACH'},
+};
+
+const SDRS = [
+  {name:'Malvina Muraccioli',acts:18600,saos:36,pipe:461000},{name:'Loic Hermabessiere',acts:3200,saos:13,pipe:308000},
+  {name:'Marva Hakimi',acts:8000,saos:10,pipe:264000},{name:'Casey Arra',acts:3044,saos:5,pipe:46000},
+  {name:'Matthew Salisbury',acts:1000,saos:1,pipe:76000},
+  {name:'Johannes Hounsgaard',acts:1411,saos:13,pipe:230000},{name:'Lucas Durst',acts:2019,saos:13,pipe:329000},
+  {name:'Burak Ayten',acts:3155,saos:5,pipe:579000},{name:'Julian Spretz',acts:1850,saos:5,pipe:64000},
+  {name:'Armin Oesterwind',acts:878,saos:1,pipe:17000},{name:'Julia Laura Damrath',acts:346,saos:3,pipe:34000},
+  {name:'Fabio Ferrauti',acts:1088,saos:6,pipe:91000},{name:'Philip Croes',acts:617,saos:6,pipe:151000},
+  {name:'Giulio Sudano',acts:632,saos:2,pipe:51000},{name:'Salma Geaissa',acts:327,saos:1,pipe:3800},
+  {name:'Andrew Moher',acts:2337,saos:16,pipe:90000},{name:'Tyler Escamilla',acts:1665,saos:13,pipe:380000},
+  {name:'Richard Lam',acts:2378,saos:14,pipe:62000},{name:'Gracie Haskell',acts:4910,saos:5,pipe:37000},
+  {name:'Ryuya Tanida',acts:7600,saos:44,pipe:553000},{name:'Chisako Nukui',acts:7883,saos:26,pipe:352000},
+  {name:'Kai Nakamichi',acts:4986,saos:22,pipe:360000},{name:'Kaho Mizumachi',acts:3600,saos:12,pipe:50000},
+  {name:'Sho Nakazawa',acts:1849,saos:17,pipe:138000},{name:'Kelly Sito',acts:912,saos:1,pipe:2500},
+  {name:'Lucas Schmalzl',acts:3478,saos:38,pipe:300000},{name:'Oisin Flynn',acts:12300,saos:11,pipe:145000},
+  {name:'Ying Hong',acts:3276,saos:8,pipe:63000},
+];
+
+const LAST_WEEK_ACTS = {
+  'Andrew Moher':537,'Armin Oesterwind':4,'Burak Ayten':655,'Casey Arra':744,'Chisako Nukui':883,
+  'Fabio Ferrauti':352,'Giulio Sudano':156,'Gracie Haskell':910,'Johannes Hounsgaard':11,
+  'Julia Laura Damrath':287,'Julian Spretz':856,'Kaho Mizumachi':1500,'Kai Nakamichi':486,
+  'Kelly Sito':543,'Loic Hermabessiere':1100,'Lucas Durst':619,'Lucas Schmalzl':78,
+  'Malvina Muraccioli':3600,'Marva Hakimi':1600,'Matthew Salisbury':0,'Oisin Flynn':2800,
+  'Philip Croes':60,'Richard Lam':878,'Ryuya Tanida':1500,'Salma Geaissa':185,
+  'Sho Nakazawa':649,'Tyler Escamilla':365,'Ying Hong':76,
+};
+
+const PREV_WEEK = { totalPipe:4183495, totalSAOs:286, totalActs:81907, activeSDRs:28 };
+
+const WEEKS_DEF = [
+  {n:1,ending:'2026-01-08'},{n:2,ending:'2026-01-15'},{n:3,ending:'2026-01-22'},{n:4,ending:'2026-01-29'},
+  {n:5,ending:'2026-02-05'},{n:6,ending:'2026-02-12'},{n:7,ending:'2026-02-19'},{n:8,ending:'2026-02-26'},
+  {n:9,ending:'2026-03-05'},{n:10,ending:'2026-03-12'},{n:11,ending:'2026-03-19'},{n:12,ending:'2026-03-26'},
+  {n:13,ending:'2026-03-31'},
+];
+
+const WEEK_HISTORY = [
+  {week:1,EMEA_OB:{pipe:63695,saos:7},DACH_ENT_OB:{pipe:49000,saos:4},DACH_CORP_OB:{pipe:6700,saos:1},AMER_OB:{pipe:4700,saos:2},APJ_OB:{pipe:224500,saos:15},INBOUND:{pipe:17000,saos:3},IB_DACH:{pipe:14000,saos:1},IB_EMEA:{pipe:3000,saos:2}},
+  {week:2,EMEA_OB:{pipe:421695,saos:21},DACH_ENT_OB:{pipe:262000,saos:11},DACH_CORP_OB:{pipe:10900,saos:2},AMER_OB:{pipe:99700,saos:14},APJ_OB:{pipe:323600,saos:22},INBOUND:{pipe:87000,saos:12},IB_DACH:{pipe:84000,saos:10},IB_EMEA:{pipe:3000,saos:2}},
+  {week:3,EMEA_OB:{pipe:604695,saos:33},DACH_ENT_OB:{pipe:319600,saos:15},DACH_CORP_OB:{pipe:39700,saos:5},AMER_OB:{pipe:111500,saos:18},APJ_OB:{pipe:464400,saos:37},INBOUND:{pipe:172000,saos:19},IB_DACH:{pipe:169000,saos:17},IB_EMEA:{pipe:3000,saos:2}},
+  {week:4,EMEA_OB:{pipe:604695,saos:33},DACH_ENT_OB:{pipe:330600,saos:17},DACH_CORP_OB:{pipe:39700,saos:5},AMER_OB:{pipe:142500,saos:23},APJ_OB:{pipe:533400,saos:44},INBOUND:{pipe:172000,saos:19},IB_DACH:{pipe:169000,saos:17},IB_EMEA:{pipe:3000,saos:2}},
+  {week:5,EMEA_OB:{pipe:707195,saos:42},DACH_ENT_OB:{pipe:473600,saos:25},DACH_CORP_OB:{pipe:116700,saos:9},AMER_OB:{pipe:712500,saos:31},APJ_OB:{pipe:846000,saos:72},INBOUND:{pipe:233800,saos:29},IB_DACH:{pipe:205800,saos:24},IB_EMEA:{pipe:28000,saos:5}},
+  {week:6,EMEA_OB:{pipe:993695,saos:59},DACH_ENT_OB:{pipe:594000,saos:33},DACH_CORP_OB:{pipe:182000,saos:11},AMER_OB:{pipe:972800,saos:45},APJ_OB:{pipe:1043000,saos:94},INBOUND:{pipe:398000,saos:44},IB_DACH:{pipe:273000,saos:36},IB_EMEA:{pipe:125000,saos:8}},
+  {week:7,EMEA_OB:{pipe:1212495,saos:70},DACH_ENT_OB:{pipe:1253000,saos:40},DACH_CORP_OB:{pipe:296800,saos:15},AMER_OB:{pipe:1014000,saos:52},APJ_OB:{pipe:1455500,saos:122},INBOUND:{pipe:508000,saos:57},IB_DACH:{pipe:363000,saos:46},IB_EMEA:{pipe:145000,saos:11}},
+];
+
+const SDR_WEEK_HISTORY = {
+  'Malvina Muraccioli':[31000,94000,55000,0,86000,103000,79000],'Loic Hermabessiere':[25000,68000,53000,0,15000,19000,129000],
+  'Marva Hakimi':[0,120000,25000,0,0,79000,0],'Casey Arra':[0,0,0,0,1500,15000,11000],
+  'Matthew Salisbury':[0,76000,0,0,0,0,0],
+  'Johannes Hounsgaard':[5000,172000,7600,11000,34000,0,0],'Lucas Durst':[0,25000,50000,0,86000,44000,124000],
+  'Burak Ayten':[27000,16000,0,0,0,36000,500000],'Julian Spretz':[0,0,0,0,23000,6000,35000],
+  'Armin Oesterwind':[17000,0,0,0,0,0,0],'Julia Laura Damrath':[0,0,0,0,0,34000,0],
+  'Fabio Ferrauti':[6700,4200,19000,0,61000,0,0],'Philip Croes':[0,0,9800,0,16000,65000,60000],
+  'Giulio Sudano':[0,0,0,0,0,0,51000],'Salma Geaissa':[0,0,0,0,0,0,3800],
+  'Andrew Moher':[4700,0,9300,19000,31000,24000,14000],'Tyler Escamilla':[0,83000,0,0,76000,218000,0],
+  'Richard Lam':[0,2700,0,12000,0,13000,36000],'Gracie Haskell':[0,4500,2500,0,23000,0,4500],
+  'Ryuya Tanida':[126000,24000,65000,11000,124000,47000,154000],'Chisako Nukui':[28000,13000,4700,25000,91000,30000,95000],
+  'Kai Nakamichi':[19000,55000,13000,25000,65000,28000,150000],'Kaho Mizumachi':[2500,5100,3100,0,13000,13000,7600],
+  'Sho Nakazawa':[49000,2000,55000,7600,20000,2500,2800],'Kelly Sito':[0,0,0,0,0,0,2500],
+  'Lucas Schmalzl':[14000,70000,85000,0,33000,58000,40000],'Oisin Flynn':[3000,0,0,0,25000,86000,20000],
+  'Ying Hong':[0,0,0,0,3800,7000,50000],
+};
+
+const SDR_SAO_HISTORY = {
+  'Malvina Muraccioli':[2,6,6,0,6,6,7],'Loic Hermabessiere':[1,3,3,0,2,2,2],'Marva Hakimi':[0,4,2,0,0,3,0],
+  'Casey Arra':[0,0,0,0,1,1,2],'Matthew Salisbury':[0,1,0,0,0,0,0],
+  'Johannes Hounsgaard':[1,5,2,2,3,0,0],'Lucas Durst':[0,1,2,0,3,3,4],'Burak Ayten':[2,1,0,0,0,1,1],
+  'Julian Spretz':[0,0,0,0,2,1,2],'Armin Oesterwind':[1,0,0,0,0,0,0],'Julia Laura Damrath':[0,0,0,0,0,3,0],
+  'Fabio Ferrauti':[1,1,2,0,2,0,0],'Philip Croes':[0,0,1,0,2,2,1],'Giulio Sudano':[0,0,0,0,0,0,2],
+  'Salma Geaissa':[0,0,0,0,0,0,1],
+  'Andrew Moher':[2,0,3,3,5,2,1],'Tyler Escamilla':[0,6,0,0,1,5,0],'Richard Lam':[0,2,0,2,0,5,5],
+  'Gracie Haskell':[0,1,1,0,1,0,1],
+  'Ryuya Tanida':[5,3,6,3,8,4,14],'Chisako Nukui':[4,1,1,1,7,3,5],'Kai Nakamichi':[2,1,1,2,7,3,5],
+  'Kaho Mizumachi':[1,1,1,0,3,3,1],'Sho Nakazawa':[3,1,6,1,3,1,2],'Kelly Sito':[0,0,0,0,0,0,1],
+  'Lucas Schmalzl':[1,9,7,0,6,9,6],'Oisin Flynn':[2,0,0,0,3,2,3],'Ying Hong':[0,0,0,0,1,2,4],
+};
+
+const SDR_ACT_HISTORY = {
+  'Malvina Muraccioli':[2600,2600,2600,2500,2600,2100,3600],'Loic Hermabessiere':[58,394,664,310,169,460,1100],
+  'Marva Hakimi':[1400,1200,962,507,1100,1200,1600],'Casey Arra':[1,101,384,905,451,411,744],
+  'Matthew Salisbury':[6,14,305,87,184,303,0],
+  'Johannes Hounsgaard':[111,253,149,3,148,302,11],'Lucas Durst':[37,175,307,54,280,476,619],
+  'Burak Ayten':[110,620,361,223,452,682,655],'Julian Spretz':[124,85,18,8,123,581,856],
+  'Armin Oesterwind':[360,368,127,5,3,6,4],'Julia Laura Damrath':[0,1,2,0,4,33,287],
+  'Fabio Ferrauti':[43,399,28,4,121,132,352],'Philip Croes':[72,266,62,2,88,70,60],
+  'Giulio Sudano':[62,75,107,64,38,130,156],'Salma Geaissa':[0,1,0,0,37,95,185],
+  'Andrew Moher':[315,398,226,88,272,457,537],'Tyler Escamilla':[202,190,365,175,174,111,365],
+  'Richard Lam':[385,275,255,155,77,305,878],'Gracie Haskell':[73,165,579,981,1100,860,910],
+  'Ryuya Tanida':[348,921,1300,1500,946,877,1500],'Chisako Nukui':[117,574,2300,1600,1500,847,883],
+  'Kai Nakamichi':[464,1100,642,814,715,552,486],'Kaho Mizumachi':[2,48,410,593,433,506,1500],
+  'Sho Nakazawa':[46,163,191,45,51,486,649],'Kelly Sito':[0,0,0,0,0,366,543],
+  'Lucas Schmalzl':[40,1200,995,435,570,104,78],'Oisin Flynn':[412,815,2300,1000,2300,2200,2800],
+  'Ying Hong':[15,1100,973,7,957,68,76],
+};
+
+const HIGHLIGHTS = [
+  {emoji:'💥',name:'Burak A.',title:'Half-Million Week',stat:'+€500k pipeline',detail:'€579k cumulative — one deal transformed DACH Enterprise in a single week.'},
+  {emoji:'🔥',name:'Ryuya T.',title:'14 SAOs in One Week',stat:'44 cumulative SAOs',detail:'Global #1 SAO producer. €553k pipeline. APJ\'s undisputed engine.'},
+  {emoji:'🚀',name:'Loïc H.',title:'Breakout Week',stat:'+€129k pipeline',detail:'€308k cumulative. Biggest single-week add of his tenure — EMEA OB momentum.'},
+  {emoji:'🏆',name:'Kai N.',title:'Consistent Growth',stat:'+€150k & 5 SAOs',detail:'€360k cumulative pipeline, 22 SAOs. Quietly building an outstanding quarter.'},
+  {emoji:'📈',name:'Lucas S.',title:'SAO Machine',stat:'38 cumulative SAOs',detail:'+6 this week. Global #1 cumulative SAOs with €300k pipeline.'},
+];
+
+// ════════════════════════════════════════════════════════════
+// DERIVED DATA
+// ════════════════════════════════════════════════════════════
+const WE = WEEK.weeksElapsed;
+const ALL_BUS = ['EMEA_OB','DACH_ENT_OB','DACH_CORP_OB','AMER_OB','APJ_OB','INBOUND'];
+
+SDRS.forEach(s => { const r = SDR_ROSTER[s.name]; if(r){s.bu=r.bu;s.region=r.region;} });
+
+function prorate(tgt) {
+  const d = new Date(WEEK.ending), day = d.getDate(), m = d.getMonth();
+  if (m===0) return (day/31)*tgt.jan;
+  if (m===1) return tgt.jan + (day/28)*tgt.feb;
+  return tgt.jan + tgt.feb + (day/31)*tgt.mar;
+}
+function prorateSao(tgt) {
+  const d = new Date(WEEK.ending), m = d.getMonth();
+  let day = d.getDate() + 2;
+  const daysInMonth = [31,28,31][m]; if(day>daysInMonth) day=daysInMonth;
+  if (m===0) return (day/31)*tgt.jan;
+  if (m===1) return tgt.jan + (day/28)*tgt.feb;
+  return tgt.jan + tgt.feb + (day/31)*tgt.mar;
+}
+
+SDRS.forEach(s => {
+  const pt = MONTHLY_PIPE_TARGETS[s.name], st = MONTHLY_SAO_TARGETS[s.name];
+  s.pipeTarget = pt ? Math.round(prorate(pt)) : 0;
+  s.pipeQ1 = pt ? pt.jan+pt.feb+pt.mar : 0;
+  s.saoT = st ? Math.round(prorateSao(st)) : 0;
+  s.saoQ1 = st ? st.jan+st.feb+st.mar : 0;
+  s.pipePct = s.pipeTarget > 0 ? (s.pipe/s.pipeTarget*100) : 0;
+  s.saoPct = s.saoT > 0 ? (s.saos/s.saoT*100) : 0;
+  s.weekly = Math.round(s.acts / WE);
+});
+
+// ════════════════════════════════════════════════════════════
+// FORMATTING HELPERS
+// ════════════════════════════════════════════════════════════
+function eur(v) { if(v>=1e6) return '€'+(v/1e6).toFixed(2)+'M'; if(v>=1000) return '€'+Math.round(v/1000)+'k'; return '€'+v; }
+function eurShort(v) { if(v>=1e6) return '€'+(v/1e6).toFixed(2)+'M'; if(v>=1000) return '€'+(v/1000).toFixed(1)+'k'; return '€'+v; }
+function pct(v) { return Math.round(v)+'%'; }
+function fmtDate(iso) { const d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}); }
+function fmtNum(v) { return v.toLocaleString('en-GB'); }
+
+// ════════════════════════════════════════════════════════════
+// RENDER: HEADER
+// ════════════════════════════════════════════════════════════
+document.getElementById('headerMeta').textContent = 'Q1 FY26 · Week ' + WEEK.number + ' ending ' + fmtDate(WEEK.ending);
+document.getElementById('weekBadge').textContent = WE + ' of ' + WEEK.totalWeeks + ' weeks elapsed · ' + WEEK.weeksRemaining + ' remaining';
+
+// ════════════════════════════════════════════════════════════
+// RENDER: TEAM SCOREBOARD
+// ════════════════════════════════════════════════════════════
+(function renderTeamKPIs() {
+  const snap = WEEK_HISTORY[WEEK_HISTORY.length-1];
+  const totalPipe = ALL_BUS.reduce((s,b)=>s+(snap[b]||{}).pipe||0,0);
+  const totalSAOs = ALL_BUS.reduce((s,b)=>s+(snap[b]||{}).saos||0,0);
+  const totalActs = SDRS.reduce((s,d)=>s+d.acts,0);
+  const totalPipeTarget = SDRS.reduce((s,d)=>s+d.pipeTarget,0);
+  const totalSaoTarget = SDRS.reduce((s,d)=>s+d.saoT,0);
+  const pipePct = totalPipeTarget>0 ? totalPipe/totalPipeTarget*100 : 0;
+  const saoPct = totalSaoTarget>0 ? totalSAOs/totalSaoTarget*100 : 0;
+  const onTrack = SDRS.filter(s=>s.saoPct>=75).length;
+  const weeklies = SDRS.map(s=>s.weekly).sort((a,b)=>a-b);
+  const median = weeklies.length%2===0 ? (weeklies[weeklies.length/2-1]+weeklies[weeklies.length/2])/2 : weeklies[Math.floor(weeklies.length/2)];
+
+  const tier = v => v>=90?'green':v>=70?'amber':'red';
+  document.getElementById('teamKPIs').innerHTML = `
+    <div class="kpi ${tier(pipePct)}"><div class="kpi-label">Pipeline</div><div class="kpi-value">${eurShort(totalPipe)}</div><div class="kpi-target">of ${eurShort(totalPipeTarget)} target</div><div class="kpi-delta ${pipePct>=90?'up':pipePct>=70?'flat':'down'}">${pct(pipePct)} attainment</div></div>
+    <div class="kpi ${tier(saoPct)}"><div class="kpi-label">SAOs</div><div class="kpi-value">${totalSAOs}</div><div class="kpi-target">of ${totalSaoTarget} target</div><div class="kpi-delta ${saoPct>=90?'up':saoPct>=70?'flat':'down'}">${pct(saoPct)} attainment</div></div>
+    <div class="kpi blue"><div class="kpi-label">Active SDRs</div><div class="kpi-value">${SDRS.length}</div><div class="kpi-target">across ${Object.keys(BU_META).length} teams globally</div><div class="kpi-delta flat">${onTrack} on-track (≥75% SAO)</div></div>
+    <div class="kpi ${median>=500?'green':median>=350?'amber':'red'}"><div class="kpi-label">Median Activity / Wk</div><div class="kpi-value">${median}</div><div class="kpi-target">of 500 baseline</div><div class="kpi-delta ${median>=500?'up':'flat'}">${pct(median/500*100)} of target</div></div>
+  `;
+
+  // WoW strip
+  const pipeDelta = totalPipe - PREV_WEEK.totalPipe;
+  const saoDelta = totalSAOs - PREV_WEEK.totalSAOs;
+  const actDelta = totalActs - PREV_WEEK.totalActs;
+  const arrow = v => v>0?'▲':v<0?'▼':'—';
+  const cls = v => v>0?'up':v<0?'down':'flat';
+  document.getElementById('wowStrip').innerHTML = `
+    <div class="wow-card"><div class="wow-label">Pipeline This Week</div><div class="wow-val">${eur(Math.max(0,pipeDelta))}</div><div class="wow-delta ${cls(pipeDelta)}">${arrow(pipeDelta)} vs last week</div></div>
+    <div class="wow-card"><div class="wow-label">SAOs This Week</div><div class="wow-val">${Math.max(0,saoDelta)}</div><div class="wow-delta ${cls(saoDelta)}">${arrow(saoDelta)} vs last week</div></div>
+    <div class="wow-card"><div class="wow-label">Activities This Week</div><div class="wow-val">${fmtNum(Object.values(LAST_WEEK_ACTS).reduce((s,v)=>s+v,0))}</div><div class="wow-delta up">across ${SDRS.length} SDRs</div></div>
+  `;
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: SDR SELECTOR
+// ════════════════════════════════════════════════════════════
+(function buildSelector() {
+  const sel = document.getElementById('sdrSelect');
+  const sorted = [...SDRS].sort((a,b)=>a.name.localeCompare(b.name));
+  sorted.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.name;
+    const buLabel = (BU_META[s.bu]||{}).short || s.bu;
+    opt.textContent = s.name + ' (' + buLabel + ')';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', renderPersonal);
+})();
+
+function renderPersonal() {
+  const name = document.getElementById('sdrSelect').value;
+  const section = document.getElementById('personalSection');
+  if (!name) { section.classList.remove('active'); return; }
+  section.classList.add('active');
+
+  const s = SDRS.find(d=>d.name===name);
+  if (!s) return;
+
+  const buLabel = (BU_META[s.bu]||{}).short || s.bu;
+  const pipeCol = s.pipePct>=90?'green':s.pipePct>=50?'amber':'red';
+  const saoCol = s.saoPct>=90?'green':s.saoPct>=50?'amber':'red';
+  const actCol = s.weekly>=500?'green':s.weekly>=350?'amber':'red';
+  const pipeFill = Math.min(100, s.pipePct);
+  const saoFill = Math.min(100, s.saoPct);
+
+  document.getElementById('myTargets').innerHTML = `
+    <h3>🎯 Target Progress — ${buLabel}</h3>
+    <div class="metric-row"><span class="metric-label">Pipeline</span><span class="metric-val ${pipeCol}">${eurShort(s.pipe)} <span style="font-weight:500;color:#94a3b8">of ${eurShort(s.pipeTarget)}</span></span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${pipeFill}%;background:${pipeCol==='green'?'#16a34a':pipeCol==='amber'?'#d97706':'#dc2626'}"></div></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;margin-top:2px">${pct(s.pipePct)} attainment</div>
+    <div class="metric-row" style="margin-top:8px"><span class="metric-label">SAOs</span><span class="metric-val ${saoCol}">${s.saos} <span style="font-weight:500;color:#94a3b8">of ${s.saoT}</span></span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(100,s.saoPct)}%;background:${saoCol==='green'?'#16a34a':saoCol==='amber'?'#d97706':'#dc2626'}"></div></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;margin-top:2px">${pct(s.saoPct)} attainment</div>
+    <div class="metric-row" style="margin-top:8px"><span class="metric-label">Q1 Pipeline Target</span><span class="metric-val">${eur(s.pipeQ1)}</span></div>
+    <div class="metric-row"><span class="metric-label">Q1 SAO Target</span><span class="metric-val">${s.saoQ1}</span></div>
+  `;
+
+  document.getElementById('myActivity').innerHTML = `
+    <h3>⚡ Activity</h3>
+    <div class="metric-row"><span class="metric-label">Avg Weekly Activity</span><span class="metric-val ${actCol}">${s.weekly}</span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(100,s.weekly/500*100)}%;background:${actCol==='green'?'#16a34a':actCol==='amber'?'#d97706':'#dc2626'}"></div></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;margin-top:2px">${pct(s.weekly/500*100)} of 500 baseline</div>
+    <div class="metric-row" style="margin-top:8px"><span class="metric-label">This Week</span><span class="metric-val">${fmtNum(LAST_WEEK_ACTS[name]||0)}</span></div>
+    <div class="metric-row"><span class="metric-label">Cumulative Activities</span><span class="metric-val">${fmtNum(s.acts)}</span></div>
+    <div class="metric-row"><span class="metric-label">Acts per SAO</span><span class="metric-val">${s.saos>0?Math.round(s.acts/s.saos):'—'}</span></div>
+    ${s.saos>0?`<div class="metric-row"><span class="metric-label">Avg Deal Size</span><span class="metric-val">${eur(Math.round(s.pipe/s.saos))}</span></div>`:''}
+  `;
+
+  // Run rate card — gap to FULL Q1 target, not pro-rated
+  const pipeGapQ1 = Math.max(0, s.pipeQ1 - s.pipe);
+  const reqWeekly = WEEK.weeksRemaining > 0 ? Math.round(pipeGapQ1 / WEEK.weeksRemaining) : 0;
+  const saoGapQ1 = Math.max(0, s.saoQ1 - s.saos);
+
+  document.getElementById('myRunRate').innerHTML = `
+    <h3>🏃 Run Rate to Finish Q1</h3>
+    <div class="metric-row"><span class="metric-label">Pipeline Gap to Q1 Target</span><span class="metric-val ${pipeGapQ1<=0?'green':'amber'}">${pipeGapQ1<=0?'On track!':eurShort(pipeGapQ1)}</span></div>
+    <div class="metric-row"><span class="metric-label">Weeks Remaining</span><span class="metric-val">${WEEK.weeksRemaining}</span></div>
+    <div class="metric-row"><span class="metric-label">Required / Week</span><span class="metric-val">${pipeGapQ1<=0?'—':eurShort(reqWeekly)}</span></div>
+    <div class="metric-row"><span class="metric-label">SAO Gap to Q1 Target</span><span class="metric-val">${saoGapQ1<=0?'On track!':saoGapQ1+' needed'}</span></div>
+  `;
+
+  // Sparklines
+  drawSparkline('myPipeChart', SDR_WEEK_HISTORY[name]||[], '#0F4C81', v=>eur(v));
+  drawSparkline('myActChart', SDR_ACT_HISTORY[name]||[], '#F18F01', v=>fmtNum(v));
+}
+
+function drawSparkline(canvasId, data, color, fmt) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 36;
+  const h = 150;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+
+  if (!data.length) { ctx.fillStyle='#94a3b8'; ctx.font='12px DM Sans'; ctx.fillText('No data yet',w/2-30,h/2); return; }
+
+  const max = Math.max(...data, 1);
+  const pad = {t:22,b:28,l:16,r:14};
+  const plotW = w - pad.l - pad.r;
+  const plotH = h - pad.t - pad.b;
+  const step = data.length > 1 ? plotW / (data.length - 1) : plotW;
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t + plotH);
+  data.forEach((v,i) => {
+    const x = pad.l + i * step;
+    const y = pad.t + plotH - (v/max)*plotH;
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad.l + (data.length-1)*step, pad.t + plotH);
+  ctx.closePath();
+  ctx.fillStyle = color + '18';
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  data.forEach((v,i) => {
+    const x = pad.l + i * step;
+    const y = pad.t + plotH - (v/max)*plotH;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots + labels
+  data.forEach((v,i) => {
+    const x = pad.l + i * step;
+    const y = pad.t + plotH - (v/max)*plotH;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  });
+
+  // Week labels
+  ctx.fillStyle = '#94a3b8'; ctx.font = '9px DM Sans'; ctx.textAlign = 'center';
+  data.forEach((_,i) => { ctx.fillText('W'+(i+1), pad.l + i*step, h - 8); });
+
+  // Last value label — render below dot if near top
+  const lastX = pad.l + (data.length-1)*step;
+  const lastY = pad.t + plotH - (data[data.length-1]/max)*plotH;
+  ctx.fillStyle = color; ctx.font = 'bold 11px DM Sans'; ctx.textAlign = 'right';
+  if (lastY < pad.t + 16) {
+    ctx.fillText(fmt(data[data.length-1]), lastX - 6, lastY + 16);
+  } else {
+    ctx.fillText(fmt(data[data.length-1]), lastX - 6, lastY - 8);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// RENDER: HIGHLIGHTS
+// ════════════════════════════════════════════════════════════
+document.getElementById('highlights').innerHTML = HIGHLIGHTS.map(h => `
+  <div class="highlight-card">
+    <div class="highlight-emoji">${h.emoji}</div>
+    <div class="highlight-name">${h.name}</div>
+    <div class="highlight-title">${h.title}</div>
+    <div class="highlight-stat">${h.stat}</div>
+    <div class="highlight-detail">${h.detail}</div>
+  </div>
+`).join('');
+
+// ════════════════════════════════════════════════════════════
+// RENDER: LEADERBOARDS
+// ════════════════════════════════════════════════════════════
+(function renderLeaderboards() {
+  // Pipeline this week
+  const pipeWeek = SDRS.map(s => {
+    const h = SDR_WEEK_HISTORY[s.name];
+    return { name: s.name, bu: s.bu, val: h ? h[h.length-1] : 0 };
+  }).sort((a,b)=>b.val-a.val).slice(0,7);
+
+  // Activity this week
+  const actWeek = SDRS.map(s => ({
+    name: s.name, bu: s.bu, val: LAST_WEEK_ACTS[s.name]||0
+  })).sort((a,b)=>b.val-a.val).slice(0,7);
+
+  // SAOs this week
+  const saoWeek = SDRS.map(s => {
+    const h = SDR_SAO_HISTORY[s.name];
+    return { name: s.name, bu: s.bu, val: h ? h[h.length-1] : 0 };
+  }).sort((a,b)=>b.val-a.val).slice(0,7);
+
+  // Cumulative pipeline
+  const pipeCum = [...SDRS].sort((a,b)=>b.pipe-a.pipe).slice(0,7).map(s=>({name:s.name,bu:s.bu,val:s.pipe}));
+
+  function renderLB(title, items, fmt) {
+    const rankCls = i => i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+    return `<div class="lb-card"><h3>${title}</h3>${items.map((it,i) => `
+      <div class="lb-row">
+        <div class="lb-rank ${rankCls(i)}">${i+1}</div>
+        <div class="lb-name">${it.name}</div>
+        <div class="lb-bu">${(BU_META[it.bu]||{}).short||''}</div>
+        <div class="lb-val">${fmt(it.val)}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  document.getElementById('leaderboards').innerHTML =
+    renderLB('💰 Pipeline This Week', pipeWeek, eur) +
+    renderLB('📞 Activity This Week', actWeek, fmtNum) +
+    renderLB('🎯 SAOs This Week', saoWeek, v=>v) +
+    renderLB('📊 Cumulative Pipeline', pipeCum, eur);
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: FOCUS OF THE WEEK
+// ════════════════════════════════════════════════════════════
+(function renderFocus() {
+  const snap = WEEK_HISTORY[WEEK_HISTORY.length-1];
+  const currentPipe = ALL_BUS.reduce((s,b)=>s+(snap[b]||{}).pipe||0,0);
+  const q1Target = SDRS.reduce((s,d)=>s+d.pipeQ1,0);
+  const nSDRs = SDRS.length;
+  const WR = WEEK.weeksRemaining;
+
+  // Split SDRs: above 500 avg maintain, below 500 uplift to 500
+  let projectedNewPipe = 0;
+  let aboveCount = 0, belowCount = 0;
+
+  SDRS.forEach(s => {
+    const weeklyAvg = s.acts / WE;
+    // Per-SDR conversion: their pipeline per activity
+    const convRate = s.acts > 0 ? s.pipe / s.acts : 0;
+
+    if (weeklyAvg >= 500) {
+      // Maintain current pace
+      aboveCount++;
+      projectedNewPipe += weeklyAvg * WR * convRate;
+    } else {
+      // Uplift to 500
+      belowCount++;
+      projectedNewPipe += 500 * WR * convRate;
+    }
+  });
+
+  const projectedTotal = currentPipe + projectedNewPipe;
+  const projectedPct = q1Target > 0 ? projectedTotal / q1Target * 100 : 0;
+
+  document.getElementById('focusBox').innerHTML = `
+    <div class="focus-box">
+      <div class="focus-title">📣 Focus of the Week</div>
+      <div class="focus-text">
+        Right now, <span class="focus-stat">${aboveCount}</span> of us are averaging 500+ activities per week — keep that momentum going.
+        If the remaining <span class="focus-stat">${belowCount}</span> step up to the <span class="focus-stat">500 baseline</span> for the next
+        <span class="focus-stat">${WR} weeks</span>, current conversion rates project an additional
+        <span class="focus-stat">${eur(Math.round(projectedNewPipe))}</span> in pipeline — bringing our global total to
+        <span class="focus-stat">${eur(Math.round(projectedTotal))}</span>
+        (<span class="focus-stat">${Math.round(projectedPct)}%</span> of our Q1 target).
+        The activity is in our hands. Every call, every LinkedIn touch, every email counts. Let's finish strong.
+      </div>
+    </div>
+  `;
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: TEAM TREND CHARTS
+// ════════════════════════════════════════════════════════════
+function renderBarChart(canvasId, legendId, metric) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 36;
+  const h = 220;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+
+  const nWeeks = WEEK_HISTORY.length;
+  const busToShow = ALL_BUS;
+
+  // Compute weekly increments per BU
+  const weekData = [];
+  for (let i=0; i<nWeeks; i++) {
+    const entry = {};
+    busToShow.forEach(bu => {
+      const cur = (WEEK_HISTORY[i][bu]||{})[metric] || 0;
+      const prev = i>0 ? ((WEEK_HISTORY[i-1][bu]||{})[metric] || 0) : 0;
+      entry[bu] = Math.max(0, cur - prev);
+    });
+    weekData.push(entry);
+  }
+
+  // For activity metric, sum from SDR_ACT_HISTORY instead
+  if (metric === 'acts') {
+    for (let i=0; i<nWeeks; i++) {
+      busToShow.forEach(bu => { weekData[i][bu] = 0; });
+      SDRS.forEach(s => {
+        const h = SDR_ACT_HISTORY[s.name];
+        if (h && h[i] !== undefined) weekData[i][s.bu] = (weekData[i][s.bu]||0) + h[i];
+      });
+    }
+  }
+
+  // Stack totals
+  const stackTotals = weekData.map(wd => busToShow.reduce((s,bu)=>s+(wd[bu]||0),0));
+  const maxStack = Math.max(...stackTotals, 1);
+
+  const pad = {t:10,b:24,l:55,r:10};
+  const plotW = w - pad.l - pad.r;
+  const plotH = h - pad.t - pad.b;
+  const barW = Math.min(40, plotW/nWeeks * 0.7);
+  const gap = (plotW - barW*nWeeks) / (nWeeks + 1);
+
+  // Y gridlines
+  const nGrid = 4;
+  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.5;
+  ctx.fillStyle = '#94a3b8'; ctx.font = '10px DM Sans'; ctx.textAlign = 'right';
+  for (let i=0; i<=nGrid; i++) {
+    const y = pad.t + plotH - (i/nGrid)*plotH;
+    const val = (maxStack * i / nGrid);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w-pad.r, y); ctx.stroke();
+    const label = metric==='acts' ? fmtNum(Math.round(val)) : eur(val);
+    ctx.fillText(label, pad.l-6, y+4);
+  }
+
+  // Bars
+  for (let wi=0; wi<nWeeks; wi++) {
+    const x = pad.l + gap + wi*(barW+gap);
+    let yBottom = pad.t + plotH;
+    busToShow.forEach(bu => {
+      const val = weekData[wi][bu] || 0;
+      const barH = (val/maxStack)*plotH;
+      ctx.fillStyle = BU_META[bu].color;
+      ctx.beginPath();
+      ctx.roundRect(x, yBottom-barH, barW, barH, [2,2,0,0]);
+      ctx.fill();
+      yBottom -= barH;
+    });
+
+    // Week label
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px DM Sans'; ctx.textAlign = 'center';
+    ctx.fillText('W'+(wi+1), x+barW/2, h-6);
+  }
+
+  // Legend
+  document.getElementById(legendId).innerHTML = busToShow.map(bu =>
+    `<span style="--c:${BU_META[bu].color}"><span style="background:${BU_META[bu].color};width:10px;height:10px;border-radius:2px;display:inline-block"></span> ${BU_META[bu].short}</span>`
+  ).join('');
+}
+
+document.fonts.ready.then(() => {
+  renderBarChart('pipeBarChart', 'pipeChartLegend', 'pipe');
+  renderBarChart('actBarChart', 'actChartLegend', 'acts');
+});
+
+// Footer
+document.getElementById('footer').textContent = 'Data as of ' + fmtDate(WEEK.ending) + ' · SDR Team Scoreboard · Q1 FY26';
+</script>
+</body>
+</html>
