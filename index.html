@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepL SDR Team Dashboard — Q1 FY26</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:#f8fafc;color:#1e293b;line-height:1.5}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 60px}
+  
+  /* Header */
+  .header{text-align:center;margin-bottom:32px}
+  .header h1{font-size:22px;font-weight:800;color:#0F4C81;letter-spacing:-0.5px}
+  .header .meta{font-size:13px;color:#64748b;margin-top:4px}
+  .header .week-badge{display:inline-block;background:#0F4C81;color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-top:8px}
+
+  /* Section headings */
+  .section{margin-top:36px}
+  .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;border-bottom:2px solid #e2e8f0;padding-bottom:8px}
+  .section-title{font-size:15px;font-weight:800;color:#0F4C81;text-transform:uppercase;letter-spacing:0.5px}
+  .section-sub{font-size:12px;color:#94a3b8;font-weight:500}
+
+  /* KPI cards */
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .kpi{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;position:relative;overflow:hidden}
+  .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+  .kpi.blue::before{background:#0F4C81} .kpi.green::before{background:#16a34a} .kpi.amber::before{background:#d97706} .kpi.red::before{background:#dc2626}
+  .kpi-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px}
+  .kpi-value{font-size:24px;font-weight:800;color:#0f172a;margin:4px 0 2px}
+  .kpi-target{font-size:11px;color:#94a3b8}
+  .kpi-delta{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:6px}
+  .kpi-delta.up{background:#f0fdf4;color:#16a34a} .kpi-delta.down{background:#fef2f2;color:#dc2626} .kpi-delta.flat{background:#f1f5f9;color:#64748b}
+
+  /* SDR selector */
+  .selector-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .selector-row label{font-size:13px;font-weight:700;color:#0F4C81}
+  .selector-row select{font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 14px;border:2px solid #0F4C81;border-radius:8px;background:#fff;color:#0f172a;cursor:pointer;min-width:220px}
+  .selector-row select:focus{outline:none;box-shadow:0 0 0 3px rgba(15,76,129,0.15)}
+
+  /* Personal section */
+  .personal{display:none}
+  .personal.active{display:block}
+  .personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.personal-grid{grid-template-columns:1fr}}
+  .personal-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;position:relative}
+  .personal-card h3{font-size:13px;font-weight:700;color:#0F4C81;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.3px}
+  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9}
+  .metric-row:last-child{border-bottom:none}
+  .metric-label{font-size:12px;color:#64748b}
+  .metric-val{font-size:14px;font-weight:700;color:#0f172a}
+  .metric-val.green{color:#16a34a} .metric-val.amber{color:#d97706} .metric-val.red{color:#dc2626}
+
+  /* Progress bar */
+  .prog-wrap{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:6px}
+  .prog-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+
+  /* Sparkline area */
+  .spark-canvas{width:100%;height:150px;margin-top:8px}
+
+  /* Highlights */
+  .highlights-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .highlight-card{background:linear-gradient(135deg,#0F4C81 0%,#1e6db5 100%);color:#fff;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+  .highlight-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.06);border-radius:50%}
+  .highlight-emoji{font-size:22px;margin-bottom:6px}
+  .highlight-name{font-size:11px;font-weight:500;opacity:0.8}
+  .highlight-title{font-size:14px;font-weight:800;margin:2px 0}
+  .highlight-stat{font-size:16px;font-weight:800;color:#93c5fd;margin:4px 0}
+  .highlight-detail{font-size:10px;opacity:0.7;line-height:1.4}
+  .highlight-card.bu-star{background:linear-gradient(135deg,#b8860b 0%,#f0c040 100%);color:#1e293b}
+  .highlight-card.bu-star .highlight-stat{color:#7c4a03}
+  .highlight-card.bu-star .highlight-name{color:#1e293b;opacity:0.7}
+  .highlight-card.bu-star .highlight-detail{color:#1e293b;opacity:0.6}
+  .bu-stars-grid{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:640px){.bu-stars-grid{grid-template-columns:1fr}}
+
+  /* Leaderboard */
+  .lb-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:700px){.lb-grid{grid-template-columns:1fr}}
+  .lb-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;overflow:hidden}
+  .lb-card h3{font-size:13px;font-weight:700;color:#0F4C81;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.3px}
+  .lb-row{display:grid;grid-template-columns:26px 1fr 72px 42px 64px;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #f1f5f9}
+  .lb-row:last-child{border-bottom:none}
+  .lb-rank{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+  .lb-rank.gold{background:#fef3c7;color:#92400e} .lb-rank.silver{background:#f1f5f9;color:#475569} .lb-rank.bronze{background:#fed7aa;color:#9a3412} .lb-rank.other{background:#f8fafc;color:#94a3b8}
+  .lb-name{font-size:12px;font-weight:600;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-bu{font-size:10px;color:#94a3b8;text-align:right}
+  .lb-pct{font-size:13px;font-weight:800;color:#0F4C81;text-align:right}
+  .lb-val{font-size:11px;font-weight:500;color:#94a3b8;text-align:right}
+
+  /* Focus callout */
+  .focus-box{background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:1px solid #bfdbfe;border-radius:12px;padding:20px 22px;position:relative;overflow:hidden}
+  .focus-box::before{content:'🎯';position:absolute;top:-8px;right:12px;font-size:48px;opacity:0.12}
+  .focus-title{font-size:14px;font-weight:800;color:#1e40af;margin-bottom:6px}
+  .focus-text{font-size:13px;color:#1e3a5f;line-height:1.7}
+  .focus-stat{font-weight:800;color:#0F4C81}
+
+  /* Chart area */
+  .chart-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-top:12px}
+  .chart-title{font-size:13px;font-weight:700;color:#0F4C81;margin-bottom:4px}
+  .chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .chart-legend span{font-size:10px;color:#64748b;display:flex;align-items:center;gap:4px}
+  .chart-legend span::before{content:'';width:10px;height:10px;border-radius:2px;display:inline-block}
+
+  /* WoW banner */
+  .wow-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+  .wow-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;text-align:center}
+  .wow-label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px}
+  .wow-val{font-size:18px;font-weight:800;color:#0f172a;margin:2px 0}
+  .wow-delta{font-size:11px;font-weight:700}
+  .wow-delta.up{color:#16a34a} .wow-delta.down{color:#dc2626} .wow-delta.flat{color:#64748b}
+  .section.tight{margin-top:12px}
+
+  /* Footer */
+  .footer{text-align:center;margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <h1>🏆 SDR Team Scoreboard</h1>
+  <div class="meta" id="headerMeta"></div>
+  <div class="week-badge" id="weekBadge"></div>
+</div>
+
+<!-- ═══ TEAM SCOREBOARD ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">Team Scoreboard</div><div class="section-sub">How we're tracking as a global SDR org</div></div>
+  <div class="kpi-row" id="teamKPIs"></div>
+  <div class="wow-strip" id="wowStrip"></div>
+</div>
+
+<!-- ═══ FOCUS OF THE WEEK ═══ -->
+<div class="section tight">
+  <div id="focusBox"></div>
+</div>
+
+<!-- ═══ MY PERFORMANCE ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">My Performance</div><div class="section-sub">Select your name to see where you stand</div></div>
+  <div class="selector-row">
+    <label for="sdrSelect">👤 I am:</label>
+    <select id="sdrSelect"><option value="">Select your name…</option></select>
+  </div>
+  <div class="personal" id="personalSection">
+    <div class="personal-grid">
+      <div class="personal-card" id="myTargets"></div>
+      <div class="personal-card" id="myActivity"></div>
+    </div>
+    <div class="personal-grid" style="margin-top:12px">
+      <div class="personal-card"><h3>📈 My Pipeline Trend</h3><canvas class="spark-canvas" id="myPipeChart"></canvas></div>
+      <div class="personal-card"><h3>📊 My Activity Trend</h3><canvas class="spark-canvas" id="myActChart"></canvas></div>
+    </div>
+    <div class="personal-card" style="margin-top:12px" id="myRunRate"></div>
+  </div>
+</div>
+
+<!-- ═══ GLOBAL STARS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">🌟 This Week's Global Stars</div><div class="section-sub">Standout performances across the org</div></div>
+  <div class="highlights-row" id="highlights"></div>
+</div>
+
+<!-- ═══ BU STARS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">⭐ This Week's Business Unit Stars</div><div class="section-sub">Top performer from each team by % of Q1 target retired this week</div></div>
+  <div class="highlights-row bu-stars-grid" id="buStars"></div>
+</div>
+
+<!-- ═══ LEADERBOARDS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">Leaderboards</div><div class="section-sub">Ranked by % of Q1 target — raw numbers alongside</div></div>
+  <div class="lb-grid" id="leaderboards"></div>
+</div>
+
+<!-- ═══ TEAM TRENDS ═══ -->
+<div class="section">
+  <div class="section-head"><div class="section-title">Team Momentum</div><div class="section-sub">Weekly output across the global org</div></div>
+  <div class="chart-wrap">
+    <div class="chart-title" id="pipeChartTitle">Pipeline Added Per Week</div>
+    <div class="chart-legend" id="pipeChartLegend"></div>
+    <canvas id="pipeBarChart" height="220"></canvas>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title" id="actChartTitle">Activities Per Week</div>
+    <div class="chart-legend" id="actChartLegend"></div>
+    <canvas id="actBarChart" height="220"></canvas>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="footer" id="footer"></div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DATA — identical to management dashboards, updated weekly
+// ════════════════════════════════════════════════════════════
+const WEEK = { ending: '2026-02-26', number: 8, weeksElapsed: 8, totalWeeks: 13, weeksRemaining: 5 };
+
+const BU_META = {
+  DACH_ENT_OB: { label:'DACH Enterprise OB', short:'DACH ENT', color:'#0F4C81', hcTarget:6 },
+  DACH_CORP_OB:{ label:'DACH Corporate OB', short:'DACH CORP', color:'#2563eb', hcTarget:5 },
+  EMEA_OB:     { label:'EMEA Outbound', short:'EMEA OB', color:'#F18F01', hcTarget:7 },
+  AMER_OB:     { label:'AMER Outbound', short:'AMER OB', color:'#7B2D8E', hcTarget:7 },
+  APJ_OB:      { label:'APJ Outbound', short:'APJ OB', color:'#C73E1D', hcTarget:8 },
+  INBOUND:     { label:'Inbound', short:'Inbound', color:'#64748b', hcTarget:10 },
+};
+
+const MONTHLY_PIPE_TARGETS = {
+  'Malvina Muraccioli': { jan:100000, feb:130000, mar:150000 },
+  'Loic Hermabessiere': { jan:100000, feb:130000, mar:150000 },
+  'Marva Hakimi':       { jan:50000,  feb:97000,  mar:150000 },
+  'Casey Arra':         { jan:38000,  feb:73000,  mar:112000 },
+  'Matthew Salisbury':  { jan:75000,  feb:130000, mar:150000 },
+  'Johannes Hounsgaard':{ jan:130000, feb:168000, mar:194000 },
+  'Lucas Durst':        { jan:130000, feb:168000, mar:194000 },
+  'Burak Ayten':        { jan:130000, feb:168000, mar:194000 },
+  'Julian Spretz':      { jan:130000, feb:168000, mar:194000 },
+  'Armin Oesterwind':   { jan:130000, feb:168000, mar:194000 },
+  'Julia Laura Damrath':{ jan:0,      feb:84000,  mar:146000 },
+  'Fabio Ferrauti':     { jan:100000, feb:130000, mar:150000 },
+  'Philip Croes':       { jan:100000, feb:130000, mar:150000 },
+  'Giulio Sudano':      { jan:50000,  feb:97000,  mar:150000 },
+  'Salma Geaissa':      { jan:0,      feb:65000,  mar:112000 },
+  'Andrew Moher':       { jan:99466,  feb:143967, mar:182889 },
+  'Tyler Escamilla':    { jan:114466, feb:162967, mar:204889 },
+  'Richard Lam':        { jan:99466,  feb:143967, mar:182889 },
+  'Gracie Haskell':     { jan:57233,  feb:122725, mar:204889 },
+  'Ryuya Tanida':       { jan:136274, feb:176657, mar:203911 },
+  'Chisako Nukui':      { jan:161274, feb:209657, mar:241911 },
+  'Kai Nakamichi':      { jan:161274, feb:209657, mar:241911 },
+  'Kaho Mizumachi':     { jan:136274, feb:176657, mar:203911 },
+  'Sho Nakazawa':       { jan:161274, feb:209657, mar:241911 },
+  'Kelly Sito':         { jan:0,      feb:0,      mar:75000 },
+  'Lucas Schmalzl':     { jan:187000, feb:243000, mar:280000 },
+  'Oisin Flynn':        { jan:204000, feb:265000, mar:306000 },
+  'Ying Hong':          { jan:125000, feb:243000, mar:373000 },
+  'Yasmina Banine':     { jan:0,      feb:0,      mar:75000 },
+  // Pre-loaded — will join SDRS when they appear in activity data
+  'Claire Gilpatrick':  { jan:0,      feb:0,      mar:34000 },
+  'Mayuko Ogisu':       { jan:0,      feb:0,      mar:0 },
+};
+
+const MONTHLY_SAO_TARGETS = {
+  'Malvina Muraccioli': { jan:8,  feb:10, mar:12 },
+  'Loic Hermabessiere': { jan:6,  feb:8,  mar:9 },
+  'Marva Hakimi':       { jan:4,  feb:6,  mar:9 },
+  'Casey Arra':         { jan:3,  feb:6,  mar:9 },
+  'Matthew Salisbury':  { jan:4,  feb:8,  mar:9 },
+  'Johannes Hounsgaard':{ jan:6,  feb:8,  mar:9 },
+  'Lucas Durst':        { jan:6,  feb:8,  mar:9 },
+  'Burak Ayten':        { jan:6,  feb:8,  mar:9 },
+  'Julian Spretz':      { jan:6,  feb:8,  mar:9 },
+  'Armin Oesterwind':   { jan:6,  feb:8,  mar:9 },
+  'Julia Laura Damrath':{ jan:0,  feb:4,  mar:7 },
+  'Fabio Ferrauti':     { jan:7,  feb:9,  mar:10 },
+  'Philip Croes':       { jan:7,  feb:9,  mar:10 },
+  'Giulio Sudano':      { jan:3,  feb:6,  mar:10 },
+  'Salma Geaissa':      { jan:0,  feb:4,  mar:7 },
+  'Andrew Moher':       { jan:9,  feb:13, mar:17 },
+  'Tyler Escamilla':    { jan:10, feb:15, mar:18 },
+  'Richard Lam':        { jan:9,  feb:13, mar:17 },
+  'Gracie Haskell':     { jan:5,  feb:11, mar:18 },
+  'Ryuya Tanida':       { jan:11, feb:15, mar:17 },
+  'Chisako Nukui':      { jan:13, feb:17, mar:20 },
+  'Kai Nakamichi':      { jan:13, feb:17, mar:20 },
+  'Kaho Mizumachi':     { jan:11, feb:15, mar:17 },
+  'Sho Nakazawa':       { jan:13, feb:17, mar:20 },
+  'Kelly Sito':         { jan:0,  feb:0,  mar:10 },
+  'Lucas Schmalzl':     { jan:11, feb:14, mar:17 },
+  'Oisin Flynn':        { jan:13, feb:16, mar:19 },
+  'Ying Hong':          { jan:7,  feb:14, mar:21 },
+  'Yasmina Banine':     { jan:0,  feb:0,  mar:4 },
+  // Pre-loaded — will join SDRS when they appear in activity data
+  'Claire Gilpatrick':  { jan:0,  feb:0,  mar:4 },
+  'Mayuko Ogisu':       { jan:0,  feb:0,  mar:0 },
+};
+
+const SDR_ROSTER = {
+  // EMEA OB — Julien Thuy
+  'Malvina Muraccioli': { bu:'EMEA_OB', region:'EMEA', mgr:'Julien', seg:'CORP' },
+  'Loic Hermabessiere': { bu:'EMEA_OB', region:'EMEA', mgr:'Julien', seg:'ENT' },
+  'Marva Hakimi':       { bu:'EMEA_OB', region:'EMEA', mgr:'Julien', seg:'ENT' },
+  'Casey Arra':         { bu:'EMEA_OB', region:'EMEA', mgr:'Julien', seg:'CORP' },
+  'Matthew Salisbury':  { bu:'EMEA_OB', region:'EMEA', mgr:'Julien', seg:'ENT' },
+  'Yasmina Banine':     { bu:'EMEA_OB', region:'EMEA', mgr:'Julien', seg:'ENT' },
+  // DACH ENT OB — David Perl
+  'Johannes Hounsgaard':{ bu:'DACH_ENT_OB', region:'DACH', mgr:'David Perl', seg:'ENT' },
+  'Lucas Durst':        { bu:'DACH_ENT_OB', region:'DACH', mgr:'David Perl', seg:'ENT' },
+  'Burak Ayten':        { bu:'DACH_ENT_OB', region:'DACH', mgr:'David Perl', seg:'ENT' },
+  'Julian Spretz':      { bu:'DACH_ENT_OB', region:'DACH', mgr:'David Perl', seg:'ENT' },
+  'Armin Oesterwind':   { bu:'DACH_ENT_OB', region:'DACH', mgr:'David Perl', seg:'ENT' },
+  'Julia Laura Damrath':{ bu:'DACH_ENT_OB', region:'DACH', mgr:'David Perl', seg:'ENT' },
+  // DACH CORP OB — Patricia Chemnitzer
+  'Fabio Ferrauti':     { bu:'DACH_CORP_OB', region:'DACH', mgr:'Patricia', seg:'CORP' },
+  'Philip Croes':       { bu:'DACH_CORP_OB', region:'DACH', mgr:'Patricia', seg:'CORP' },
+  'Giulio Sudano':      { bu:'DACH_CORP_OB', region:'DACH', mgr:'Patricia', seg:'CORP' },
+  'Salma Geaissa':      { bu:'DACH_CORP_OB', region:'DACH', mgr:'Patricia', seg:'CORP' },
+  // AMER OB — Woojin Shin
+  'Andrew Moher':       { bu:'AMER_OB', region:'AMER', mgr:'Woojin', seg:'CORP' },
+  'Tyler Escamilla':    { bu:'AMER_OB', region:'AMER', mgr:'Woojin', seg:'ENT' },
+  'Richard Lam':        { bu:'AMER_OB', region:'AMER', mgr:'Woojin', seg:'CORP' },
+  'Gracie Haskell':     { bu:'AMER_OB', region:'AMER', mgr:'Woojin', seg:'ENT' },
+  'Claire Gilpatrick':  { bu:'AMER_OB', region:'AMER', mgr:'Woojin', seg:'CORP' },
+  // APJ OB — Rio Uchida
+  'Ryuya Tanida':       { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'CORP' },
+  'Chisako Nukui':      { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'ENT' },
+  'Kai Nakamichi':      { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'ENT' },
+  'Kaho Mizumachi':     { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'CORP' },
+  'Sho Nakazawa':       { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'ENT' },
+  'Kelly Sito':         { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'ENT' },
+  'Mayuko Ogisu':       { bu:'APJ_OB', region:'APJ', mgr:'Rio', seg:'CORP' },
+  // INBOUND — Andy / Danielle
+  'Lucas Schmalzl':     { bu:'INBOUND', region:'DACH', mgr:'Andy', seg:'All' },
+  'Oisin Flynn':        { bu:'INBOUND', region:'EMEA', mgr:'Andy', seg:'All' },
+  'Ying Hong':          { bu:'INBOUND', region:'DACH', mgr:'Andy', seg:'All' },
+};
+
+const SDRS = [
+  // EMEA OB
+  { name:'Malvina Muraccioli', acts:21200, saos:39, pipe:480000 },
+  { name:'Loic Hermabessiere', acts:4113,  saos:17, pipe:325000 },
+  { name:'Marva Hakimi',       acts:8644,  saos:10, pipe:264000 },
+  { name:'Casey Arra',         acts:3869,  saos:8,  pipe:95000 },
+  { name:'Yasmina Banine',     acts:62,    saos:0,  pipe:0 },
+  // DACH ENT OB
+  { name:'Lucas Durst',        acts:2745,  saos:14, pipe:407000 },
+  { name:'Burak Ayten',        acts:3870,  saos:5,  pipe:579000 },
+  { name:'Julian Spretz',      acts:2543,  saos:8,  pipe:90000 },
+  { name:'Armin Oesterwind',   acts:879,   saos:1,  pipe:17000 },
+  { name:'Julia Laura Damrath',acts:695,   saos:3,  pipe:34000 },
+  // DACH CORP OB
+  { name:'Fabio Ferrauti',     acts:2021,  saos:8,  pipe:114000 },
+  { name:'Philip Croes',       acts:797,   saos:9,  pipe:178000 },
+  { name:'Giulio Sudano',      acts:812,   saos:4,  pipe:60000 },
+  { name:'Salma Geaissa',      acts:553,   saos:3,  pipe:30000 },
+  // AMER OB
+  { name:'Andrew Moher',       acts:2950,  saos:23, pipe:155000 },
+  { name:'Tyler Escamilla',    acts:2013,  saos:15, pipe:445000 },
+  { name:'Richard Lam',        acts:3300,  saos:20, pipe:128000 },
+  { name:'Gracie Haskell',     acts:5848,  saos:5,  pipe:37000 },
+  { name:'Claire Gilpatrick',  acts:714,   saos:0,  pipe:0 },
+  // APJ OB
+  { name:'Ryuya Tanida',       acts:9200,  saos:49, pipe:601000 },
+  { name:'Chisako Nukui',      acts:8277,  saos:27, pipe:357000 },
+  { name:'Kai Nakamichi',      acts:5674,  saos:25, pipe:363000 },
+  { name:'Kaho Mizumachi',     acts:4900,  saos:15, pipe:52000 },
+  { name:'Sho Nakazawa',       acts:2503,  saos:23, pipe:155000 },
+  { name:'Kelly Sito',         acts:2500,  saos:1,  pipe:2500 },
+  // INBOUND
+  { name:'Lucas Schmalzl',     acts:3582,  saos:46, pipe:359000 },
+  { name:'Oisin Flynn',        acts:14400, saos:16, pipe:216000 },
+  { name:'Ying Hong',          acts:3406,  saos:18, pipe:108000 },
+];
+
+const LAST_WEEK_ACTS = {
+  'Andrew Moher': 613, 'Armin Oesterwind': 1, 'Burak Ayten': 715,
+  'Casey Arra': 825, 'Chisako Nukui': 394, 'Claire Gilpatrick': 645,
+  'Fabio Ferrauti': 933, 'Giulio Sudano': 180, 'Gracie Haskell': 938,
+  'Julia Laura Damrath': 349, 'Julian Spretz': 693,
+  'Kaho Mizumachi': 1300, 'Kai Nakamichi': 688, 'Kelly Sito': 1588,
+  'Loic Hermabessiere': 913, 'Lucas Durst': 726, 'Lucas Schmalzl': 104,
+  'Malvina Muraccioli': 2600, 'Marva Hakimi': 644, 'Oisin Flynn': 2100,
+  'Philip Croes': 180, 'Richard Lam': 922, 'Ryuya Tanida': 1600,
+  'Salma Geaissa': 226, 'Sho Nakazawa': 654, 'Tyler Escamilla': 348,
+  'Yasmina Banine': 62, 'Ying Hong': 130,
+};
+
+const PREV_WEEK = { totalPipe:5739795, totalSAOs:356, totalActs:103404, activeSDRs:28 };
+
+// Global pipeline targets — source of truth for headline attainment (matches L-Team dashboard)
+const GLOBAL_MONTHLY_PIPE_FY26 = {
+  jan: 3005471.61, feb: 4212913.09, mar: 5258119.34,
+  apr: 4904498.73, may: 6189929.16, jun: 7352459.94,
+  jul: 6029936.55, aug: 6660474.72, sep: 8340927.36,
+  oct: 7178043.36, nov: 7777893.12, dec: 7072477.06
+};
+function prorateGlobal() {
+  const d = new Date(WEEK.ending), day = d.getDate(), m = d.getMonth();
+  const g = GLOBAL_MONTHLY_PIPE_FY26;
+  if (m===0) return (day/31)*g.jan;
+  if (m===1) return g.jan + (day/28)*g.feb;
+  return g.jan + g.feb + (day/31)*g.mar;
+}
+const GLOBAL_PIPE_TARGET = Math.round(prorateGlobal());
+
+const WEEKS_DEF = [
+  {n:1,ending:'2026-01-08'},{n:2,ending:'2026-01-15'},{n:3,ending:'2026-01-22'},{n:4,ending:'2026-01-29'},
+  {n:5,ending:'2026-02-05'},{n:6,ending:'2026-02-12'},{n:7,ending:'2026-02-19'},{n:8,ending:'2026-02-26'},
+  {n:9,ending:'2026-03-05'},{n:10,ending:'2026-03-12'},{n:11,ending:'2026-03-19'},{n:12,ending:'2026-03-26'},
+  {n:13,ending:'2026-03-31'},
+];
+
+const WEEK_HISTORY = [
+  { week:1, // ending 8 Jan
+    EMEA_OB:{pipe:63695,saos:7}, DACH_ENT_OB:{pipe:49000,saos:4}, DACH_CORP_OB:{pipe:6700,saos:1},
+    AMER_OB:{pipe:4700,saos:2}, APJ_OB:{pipe:224500,saos:15}, INBOUND:{pipe:17000,saos:3},
+    IB_DACH:{pipe:14000,saos:1}, IB_EMEA:{pipe:3000,saos:2} },
+  { week:2, // ending 15 Jan
+    EMEA_OB:{pipe:421695,saos:21}, DACH_ENT_OB:{pipe:262000,saos:11}, DACH_CORP_OB:{pipe:10900,saos:2},
+    AMER_OB:{pipe:99700,saos:14}, APJ_OB:{pipe:323600,saos:22}, INBOUND:{pipe:87000,saos:12},
+    IB_DACH:{pipe:84000,saos:10}, IB_EMEA:{pipe:3000,saos:2} },
+  { week:3, // ending 22 Jan
+    EMEA_OB:{pipe:604695,saos:33}, DACH_ENT_OB:{pipe:319600,saos:15}, DACH_CORP_OB:{pipe:39700,saos:5},
+    AMER_OB:{pipe:111500,saos:18}, APJ_OB:{pipe:464400,saos:37}, INBOUND:{pipe:172000,saos:19},
+    IB_DACH:{pipe:169000,saos:17}, IB_EMEA:{pipe:3000,saos:2} },
+  { week:4, // ending 29 Jan
+    EMEA_OB:{pipe:604695,saos:33}, DACH_ENT_OB:{pipe:330600,saos:17}, DACH_CORP_OB:{pipe:39700,saos:5},
+    AMER_OB:{pipe:582500,saos:24}, APJ_OB:{pipe:533000,saos:44}, INBOUND:{pipe:172000,saos:19},
+    IB_DACH:{pipe:169000,saos:17}, IB_EMEA:{pipe:3000,saos:2} },
+  { week:5, // ending 5 Feb
+    EMEA_OB:{pipe:707195,saos:42}, DACH_ENT_OB:{pipe:473600,saos:25}, DACH_CORP_OB:{pipe:116700,saos:9},
+    AMER_OB:{pipe:712500,saos:31}, APJ_OB:{pipe:846000,saos:72}, INBOUND:{pipe:233800,saos:29},
+    IB_DACH:{pipe:205800,saos:24}, IB_EMEA:{pipe:28000,saos:5} },
+  { week:6, // ending 12 Feb
+    EMEA_OB:{pipe:993695,saos:59}, DACH_ENT_OB:{pipe:594000,saos:33}, DACH_CORP_OB:{pipe:182000,saos:11},
+    AMER_OB:{pipe:972800,saos:45}, APJ_OB:{pipe:1043000,saos:94}, INBOUND:{pipe:398000,saos:44},
+    IB_DACH:{pipe:273000,saos:36}, IB_EMEA:{pipe:125000,saos:8} },
+  { week:7, // ending 19 Feb
+    EMEA_OB:{pipe:1212495,saos:70}, DACH_ENT_OB:{pipe:1253000,saos:40}, DACH_CORP_OB:{pipe:296800,saos:15},
+    AMER_OB:{pipe:1014000,saos:52}, APJ_OB:{pipe:1455500,saos:122}, INBOUND:{pipe:508000,saos:57},
+    IB_DACH:{pipe:363000,saos:46}, IB_EMEA:{pipe:145000,saos:11} },
+  { week:8, // ending 26 Feb — scaled from bar readings to match €6,439,846 headline
+    EMEA_OB:{pipe:1407000,saos:77}, DACH_ENT_OB:{pipe:1432000,saos:47}, DACH_CORP_OB:{pipe:463000,saos:24},
+    AMER_OB:{pipe:916000,saos:64}, APJ_OB:{pipe:1588000,saos:143}, INBOUND:{pipe:683000,saos:81},
+    IB_DACH:{pipe:467000,saos:65}, IB_EMEA:{pipe:216000,saos:16} },
+];
+
+const SDR_WEEK_HISTORY = {
+  // [w1, w2, w3, w4, w5, w6, w7, w8] — single-week pipe values from Salesforce
+  // EMEA OB
+  'Malvina Muraccioli':  [31000,94000,55000,0,86000,103000,79000,18000],
+  'Loic Hermabessiere':  [25000,68000,53000,0,15000,19000,129000,2500],
+  'Marva Hakimi':        [0,120000,25000,0,0,79000,0,0],
+  'Casey Arra':          [0,0,0,0,1500,15000,11000,28000],
+  'Matthew Salisbury':   [0,76000,0,0,0,0,0,0],
+  'Yasmina Banine':      [0,0,0,0,0,0,0,0],
+  // DACH ENT OB
+  'Johannes Hounsgaard': [5000,172000,7600,11000,34000,0,0,23000],
+  'Lucas Durst':         [0,25000,50000,0,86000,44000,124000,31000],
+  'Burak Ayten':         [27000,16000,0,0,0,36000,500000,0],
+  'Julian Spretz':       [0,0,0,0,23000,6000,35000,26000],
+  'Armin Oesterwind':    [17000,0,0,0,0,0,0,0],
+  'Julia Laura Damrath': [0,0,0,0,0,34000,0,3000],
+  // DACH CORP OB
+  'Fabio Ferrauti':      [6700,4200,19000,0,61000,0,0,23000],
+  'Philip Croes':        [0,0,0,0,0,70000,81000,26000],
+  'Giulio Sudano':       [0,0,0,0,0,42000,9000,9000],
+  'Salma Geaissa':       [0,0,0,0,0,0,3800,26000],
+  // AMER OB
+  'Andrew Moher':        [0,9000,7000,466000,15000,43000,10000,47000],
+  'Tyler Escamilla':     [0,95000,0,0,0,277000,8000,63000],
+  'Richard Lam':         [0,0,0,42000,0,7000,13000,19000],
+  'Gracie Haskell':      [4700,0,5000,0,8000,15000,5000,0],
+  'Claire Gilpatrick':   [0,0,0,0,0,0,0,0],
+  // APJ OB
+  'Ryuya Tanida':        [41000,35000,106000,4000,113000,87000,167000,1600],
+  'Chisako Nukui':       [0,1000,2200,63000,110000,65000,63000,26000],
+  'Kai Nakamichi':       [0,0,0,108000,91000,37000,35000,5100],
+  'Kaho Mizumachi':      [0,0,3600,0,22000,15000,9000,0],
+  'Sho Nakazawa':        [0,0,32000,0,22000,40000,44000,2900],
+  'Kelly Sito':          [0,0,0,0,0,0,2500,0],
+  // INBOUND (combined IB + regional OB attribution)
+  'Lucas Schmalzl':      [14000,70000,85000,0,34000,67000,30000,59000],
+  'Oisin Flynn':         [3000,0,0,0,25000,97000,20000,71000],
+  'Ying Hong':           [0,17000,0,0,3000,8000,35000,45000],
+};
+
+const SDR_SAO_HISTORY = {
+  // [w1, w2, w3, w4, w5, w6, w7, w8] — single-week SAO counts from Salesforce
+  // Daily-verified SDRs marked with ✓
+  // EMEA OB
+  'Malvina Muraccioli':  [2,6,6,0,6,6,7,6],
+  'Loic Hermabessiere':  [1,4,3,0,2,3,3,1],       // ✓ daily
+  'Marva Hakimi':        [0,4,2,0,0,3,0,1],
+  'Casey Arra':          [0,0,0,0,1,2,3,2],         // ✓ daily
+  'Matthew Salisbury':   [0,1,0,0,0,0,0,0],
+  'Yasmina Banine':      [0,0,0,0,0,0,0,0],
+  // DACH ENT OB
+  'Johannes Hounsgaard': [1,5,2,2,3,0,0,2],         // ✓ daily
+  'Lucas Durst':         [0,1,2,0,3,3,4,1],
+  'Burak Ayten':         [2,1,0,0,0,1,1,0],
+  'Julian Spretz':       [0,0,0,0,2,1,2,3],         // ✓ daily
+  'Armin Oesterwind':    [1,0,0,0,0,0,0,0],
+  'Julia Laura Damrath': [0,0,0,0,0,3,0,0],
+  // DACH CORP OB
+  'Fabio Ferrauti':      [1,1,2,0,2,0,0,2],
+  'Philip Croes':        [0,0,1,0,2,2,1,3],
+  'Giulio Sudano':       [0,0,0,0,0,0,2,2],
+  'Salma Geaissa':       [0,0,0,0,0,0,1,2],
+  // AMER OB
+  'Andrew Moher':        [2,0,3,3,5,2,1,7],
+  'Tyler Escamilla':     [0,6,0,0,1,7,0,1],         // ✓ daily
+  'Richard Lam':         [0,2,0,2,0,6,5,5],         // ✓ daily
+  'Gracie Haskell':      [0,1,1,0,1,0,1,1],
+  'Claire Gilpatrick':   [0,0,0,0,0,0,0,0],
+  // APJ OB
+  'Ryuya Tanida':        [5,3,6,2,8,5,12,8],        // ✓ daily
+  'Chisako Nukui':       [4,1,1,1,7,3,5,5],
+  'Kai Nakamichi':       [2,1,1,2,7,3,5,4],
+  'Kaho Mizumachi':      [1,1,1,0,3,5,1,3],         // ✓ daily
+  'Sho Nakazawa':        [2,1,6,1,3,1,2,7],         // ✓ daily
+  'Kelly Sito':          [0,0,0,0,0,0,1,0],
+  // INBOUND (Lucas Schmalzl and Oisin Flynn combine IB + regional OB attribution)
+  'Lucas Schmalzl':      [1,9,7,0,6,9,6,8],
+  'Oisin Flynn':         [2,0,0,0,3,2,3,6],
+  'Ying Hong':           [0,0,0,0,1,2,4,11],
+};
+
+const SDR_ACT_HISTORY = {
+  // [w1, w2, w3, w4, w5, w6, w7, w8] — single-week activity counts from Salesloft
+  // EMEA OB
+  'Malvina Muraccioli':  [2600,2600,2600,2500,2600,2100,3600,2600],
+  'Loic Hermabessiere':  [58,394,664,310,169,460,1100,913],
+  'Marva Hakimi':        [1400,1200,962,507,1100,1200,1600,644],
+  'Casey Arra':          [1,101,384,905,451,411,744,825],
+  'Matthew Salisbury':   [6,14,305,87,184,303,0,0],
+  'Yasmina Banine':      [0,0,0,0,0,0,0,62],
+  // DACH ENT OB
+  'Johannes Hounsgaard': [111,253,149,3,148,302,11,490],
+  'Lucas Durst':         [37,175,307,54,280,476,619,726],
+  'Burak Ayten':         [110,620,361,223,452,682,655,715],
+  'Julian Spretz':       [124,85,18,8,123,581,856,693],
+  'Armin Oesterwind':    [360,368,127,5,3,6,4,1],
+  'Julia Laura Damrath': [0,1,2,0,4,33,287,349],
+  // DACH CORP OB
+  'Fabio Ferrauti':      [43,399,28,4,121,132,352,933],
+  'Philip Croes':        [72,266,62,2,88,70,60,180],
+  'Giulio Sudano':       [62,75,107,64,38,130,156,180],
+  'Salma Geaissa':       [0,1,0,0,37,95,185,226],
+  // AMER OB
+  'Andrew Moher':        [315,398,226,88,272,457,537,613],
+  'Tyler Escamilla':     [202,190,365,175,174,111,365,348],
+  'Richard Lam':         [385,275,255,155,77,305,878,922],
+  'Gracie Haskell':      [73,165,579,981,1100,860,910,938],
+  'Claire Gilpatrick':   [0,0,0,0,0,0,69,645],
+  // APJ OB
+  'Ryuya Tanida':        [348,921,1300,1500,946,877,1500,1600],
+  'Chisako Nukui':       [117,574,2300,1600,1500,847,883,394],
+  'Kai Nakamichi':       [464,1100,642,814,715,552,486,688],
+  'Kaho Mizumachi':      [2,48,410,593,433,506,1500,1300],
+  'Sho Nakazawa':        [46,163,191,45,51,486,649,654],
+  'Kelly Sito':          [0,0,0,0,0,366,543,1588],
+  // INBOUND
+  'Lucas Schmalzl':      [40,1200,995,435,570,104,78,104],
+  'Oisin Flynn':         [412,815,2300,1000,2300,2200,2800,2100],
+  'Ying Hong':           [15,1100,973,7,957,68,76,130],
+};
+
+const HIGHLIGHTS = [
+  { emoji:'💥', name:'Ying Hong', title:'11-SAO Breakout', stat:'18 cumulative SAOs', detail:'From 7 to 18 in one week. Biggest single-week SAO output of any SDR this quarter.' },
+  { emoji:'🔥', name:'Ryuya T.', title:'€600k Club', stat:'49 SAOs · €601k pipe', detail:'First SDR to break €600k pipeline. 8 more SAOs this week — relentless consistency.' },
+  { emoji:'🚀', name:'Sho N.', title:'7-SAO Surge', stat:'€155k · 23 SAOs', detail:'Strongest single week of the quarter. Pipeline up €17k with massive conversion momentum.' },
+  { emoji:'🏆', name:'Andrew M.', title:'7-SAO Week', stat:'€155k · 23 SAOs', detail:'+€65k pipeline and 7 SAOs. AMER OB engine firing on all cylinders.' },
+  { emoji:'📈', name:'Lucas S.', title:'Dual-Attribution Machine', stat:'46 SAOs · €359k pipe', detail:'8 SAOs this week across IB + DACH. Global #1 cumulative SAO producer.' },
+];
+
+// ════════════════════════════════════════════════════════════
+// DERIVED DATA
+// ════════════════════════════════════════════════════════════
+const WE = WEEK.weeksElapsed;
+const ALL_BUS = ['EMEA_OB','DACH_ENT_OB','DACH_CORP_OB','AMER_OB','APJ_OB','INBOUND'];
+
+SDRS.forEach(s => { const r = SDR_ROSTER[s.name]; if(r){s.bu=r.bu;s.region=r.region;} });
+
+function prorate(tgt) {
+  const d = new Date(WEEK.ending), day = d.getDate(), m = d.getMonth();
+  if (m===0) return (day/31)*tgt.jan;
+  if (m===1) return tgt.jan + (day/28)*tgt.feb;
+  return tgt.jan + tgt.feb + (day/31)*tgt.mar;
+}
+function prorateSao(tgt) {
+  const d = new Date(WEEK.ending), m = d.getMonth();
+  let day = d.getDate() + 2;
+  const daysInMonth = [31,28,31][m]; if(day>daysInMonth) day=daysInMonth;
+  if (m===0) return (day/31)*tgt.jan;
+  if (m===1) return tgt.jan + (day/28)*tgt.feb;
+  return tgt.jan + tgt.feb + (day/31)*tgt.mar;
+}
+
+SDRS.forEach(s => {
+  const pt = MONTHLY_PIPE_TARGETS[s.name], st = MONTHLY_SAO_TARGETS[s.name];
+  s.pipeTarget = pt ? Math.round(prorate(pt)) : 0;
+  s.pipeQ1 = pt ? pt.jan+pt.feb+pt.mar : 0;
+  s.saoT = st ? Math.round(prorateSao(st)) : 0;
+  s.saoQ1 = st ? st.jan+st.feb+st.mar : 0;
+  s.pipePct = s.pipeTarget > 0 ? (s.pipe/s.pipeTarget*100) : 0;
+  s.saoPct = s.saoT > 0 ? (s.saos/s.saoT*100) : 0;
+  s.weekly = Math.round(s.acts / WE);
+});
+
+// ════════════════════════════════════════════════════════════
+// FORMATTING HELPERS
+// ════════════════════════════════════════════════════════════
+function eur(v) { if(v>=1e6) return '€'+(v/1e6).toFixed(2)+'M'; if(v>=1000) return '€'+Math.round(v/1000)+'k'; return '€'+v; }
+function eurShort(v) { if(v>=1e6) return '€'+(v/1e6).toFixed(2)+'M'; if(v>=1000) return '€'+(v/1000).toFixed(1)+'k'; return '€'+v; }
+function pct(v) { return Math.round(v)+'%'; }
+function fmtDate(iso) { const d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}); }
+function fmtNum(v) { return v.toLocaleString('en-GB'); }
+
+// ════════════════════════════════════════════════════════════
+// RENDER: HEADER
+// ════════════════════════════════════════════════════════════
+document.getElementById('headerMeta').textContent = 'Q1 FY26 · Week ' + WEEK.number + ' ending ' + fmtDate(WEEK.ending);
+document.getElementById('weekBadge').textContent = WE + ' of ' + WEEK.totalWeeks + ' weeks elapsed · ' + WEEK.weeksRemaining + ' remaining';
+
+// ════════════════════════════════════════════════════════════
+// RENDER: TEAM SCOREBOARD
+// ════════════════════════════════════════════════════════════
+(function renderTeamKPIs() {
+  const snap = WEEK_HISTORY[WEEK_HISTORY.length-1];
+  const totalPipe = ALL_BUS.reduce((s,b)=>s+(snap[b]||{}).pipe||0,0);
+  const totalSAOs = ALL_BUS.reduce((s,b)=>s+(snap[b]||{}).saos||0,0);
+  const totalActs = SDRS.reduce((s,d)=>s+d.acts,0);
+  const totalPipeTarget = GLOBAL_PIPE_TARGET;  // Global target, not sum of individuals
+  const totalSaoTarget = SDRS.reduce((s,d)=>s+d.saoT,0);
+  const pipePct = totalPipeTarget>0 ? totalPipe/totalPipeTarget*100 : 0;
+  const saoPct = totalSaoTarget>0 ? totalSAOs/totalSaoTarget*100 : 0;
+  const onTrack = SDRS.filter(s=>s.saoPct>=75).length;
+  const weeklies = SDRS.map(s=>s.weekly).sort((a,b)=>a-b);
+  const median = weeklies.length%2===0 ? (weeklies[weeklies.length/2-1]+weeklies[weeklies.length/2])/2 : weeklies[Math.floor(weeklies.length/2)];
+
+  const tier = v => v>=90?'green':v>=70?'amber':'red';
+  document.getElementById('teamKPIs').innerHTML = `
+    <div class="kpi ${tier(pipePct)}"><div class="kpi-label">Pipeline</div><div class="kpi-value">${eurShort(totalPipe)}</div><div class="kpi-target">of ${eurShort(totalPipeTarget)} target</div><div class="kpi-delta ${pipePct>=90?'up':pipePct>=70?'flat':'down'}">${pct(pipePct)} attainment</div></div>
+    <div class="kpi ${tier(saoPct)}"><div class="kpi-label">SAOs</div><div class="kpi-value">${totalSAOs}</div><div class="kpi-target">of ${totalSaoTarget} target</div><div class="kpi-delta ${saoPct>=90?'up':saoPct>=70?'flat':'down'}">${pct(saoPct)} attainment</div></div>
+    <div class="kpi blue"><div class="kpi-label">Active SDRs</div><div class="kpi-value">${SDRS.length}</div><div class="kpi-target">across ${Object.keys(BU_META).length} teams globally</div><div class="kpi-delta flat">${onTrack} on-track (≥75% SAO)</div></div>
+    <div class="kpi ${median>=500?'green':median>=350?'amber':'red'}"><div class="kpi-label">Median Activity / Wk</div><div class="kpi-value">${median}</div><div class="kpi-target">of 500 baseline</div><div class="kpi-delta ${median>=500?'up':'flat'}">${pct(median/500*100)} of target</div></div>
+  `;
+
+  // WoW strip
+  const pipeDelta = totalPipe - PREV_WEEK.totalPipe;
+  const saoDelta = totalSAOs - PREV_WEEK.totalSAOs;
+  const actDelta = totalActs - PREV_WEEK.totalActs;
+  const arrow = v => v>0?'▲':v<0?'▼':'—';
+  const cls = v => v>0?'up':v<0?'down':'flat';
+  document.getElementById('wowStrip').innerHTML = `
+    <div class="wow-card"><div class="wow-label">Pipeline This Week</div><div class="wow-val">${eur(Math.max(0,pipeDelta))}</div><div class="wow-delta ${cls(pipeDelta)}">${arrow(pipeDelta)} vs last week</div></div>
+    <div class="wow-card"><div class="wow-label">SAOs This Week</div><div class="wow-val">${Math.max(0,saoDelta)}</div><div class="wow-delta ${cls(saoDelta)}">${arrow(saoDelta)} vs last week</div></div>
+    <div class="wow-card"><div class="wow-label">Activities This Week</div><div class="wow-val">${fmtNum(Object.values(LAST_WEEK_ACTS).reduce((s,v)=>s+v,0))}</div><div class="wow-delta up">across ${SDRS.length} SDRs</div></div>
+  `;
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: SDR SELECTOR
+// ════════════════════════════════════════════════════════════
+(function buildSelector() {
+  const sel = document.getElementById('sdrSelect');
+  const sorted = [...SDRS].sort((a,b)=>a.name.localeCompare(b.name));
+  sorted.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.name;
+    const buLabel = (BU_META[s.bu]||{}).short || s.bu;
+    opt.textContent = s.name + ' (' + buLabel + ')';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', renderPersonal);
+})();
+
+function renderPersonal() {
+  const name = document.getElementById('sdrSelect').value;
+  const section = document.getElementById('personalSection');
+  if (!name) { section.classList.remove('active'); return; }
+  section.classList.add('active');
+
+  const s = SDRS.find(d=>d.name===name);
+  if (!s) return;
+
+  const buLabel = (BU_META[s.bu]||{}).short || s.bu;
+  const pipeCol = s.pipePct>=90?'green':s.pipePct>=50?'amber':'red';
+  const saoCol = s.saoPct>=90?'green':s.saoPct>=50?'amber':'red';
+  const actCol = s.weekly>=500?'green':s.weekly>=350?'amber':'red';
+  const pipeFill = Math.min(100, s.pipePct);
+  const saoFill = Math.min(100, s.saoPct);
+
+  document.getElementById('myTargets').innerHTML = `
+    <h3>🎯 Target Progress — ${buLabel}</h3>
+    <div class="metric-row"><span class="metric-label">Pipeline</span><span class="metric-val ${pipeCol}">${eurShort(s.pipe)} <span style="font-weight:500;color:#94a3b8">of ${eurShort(s.pipeTarget)}</span></span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${pipeFill}%;background:${pipeCol==='green'?'#16a34a':pipeCol==='amber'?'#d97706':'#dc2626'}"></div></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;margin-top:2px">${pct(s.pipePct)} attainment</div>
+    <div class="metric-row" style="margin-top:8px"><span class="metric-label">SAOs</span><span class="metric-val ${saoCol}">${s.saos} <span style="font-weight:500;color:#94a3b8">of ${s.saoT}</span></span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(100,s.saoPct)}%;background:${saoCol==='green'?'#16a34a':saoCol==='amber'?'#d97706':'#dc2626'}"></div></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;margin-top:2px">${pct(s.saoPct)} attainment</div>
+    <div class="metric-row" style="margin-top:8px"><span class="metric-label">Q1 Pipeline Target</span><span class="metric-val">${eur(s.pipeQ1)}</span></div>
+    <div class="metric-row"><span class="metric-label">Q1 SAO Target</span><span class="metric-val">${s.saoQ1}</span></div>
+  `;
+
+  document.getElementById('myActivity').innerHTML = `
+    <h3>⚡ Activity</h3>
+    <div class="metric-row"><span class="metric-label">Avg Weekly Activity</span><span class="metric-val ${actCol}">${s.weekly}</span></div>
+    <div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(100,s.weekly/500*100)}%;background:${actCol==='green'?'#16a34a':actCol==='amber'?'#d97706':'#dc2626'}"></div></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;margin-top:2px">${pct(s.weekly/500*100)} of 500 baseline</div>
+    <div class="metric-row" style="margin-top:8px"><span class="metric-label">This Week</span><span class="metric-val">${fmtNum(LAST_WEEK_ACTS[name]||0)}</span></div>
+    <div class="metric-row"><span class="metric-label">Cumulative Activities</span><span class="metric-val">${fmtNum(s.acts)}</span></div>
+    <div class="metric-row"><span class="metric-label">Acts per SAO</span><span class="metric-val">${s.saos>0?Math.round(s.acts/s.saos):'—'}</span></div>
+    ${s.saos>0?`<div class="metric-row"><span class="metric-label">Avg Deal Size</span><span class="metric-val">${eur(Math.round(s.pipe/s.saos))}</span></div>`:''}
+  `;
+
+  // Run rate card — gap to FULL Q1 target, not pro-rated
+  const pipeGapQ1 = Math.max(0, s.pipeQ1 - s.pipe);
+  const reqWeekly = WEEK.weeksRemaining > 0 ? Math.round(pipeGapQ1 / WEEK.weeksRemaining) : 0;
+  const saoGapQ1 = Math.max(0, s.saoQ1 - s.saos);
+
+  document.getElementById('myRunRate').innerHTML = `
+    <h3>🏃 Run Rate to Finish Q1</h3>
+    <div class="metric-row"><span class="metric-label">Pipeline Gap to Q1 Target</span><span class="metric-val ${pipeGapQ1<=0?'green':'amber'}">${pipeGapQ1<=0?'On track!':eurShort(pipeGapQ1)}</span></div>
+    <div class="metric-row"><span class="metric-label">Weeks Remaining</span><span class="metric-val">${WEEK.weeksRemaining}</span></div>
+    <div class="metric-row"><span class="metric-label">Required / Week</span><span class="metric-val">${pipeGapQ1<=0?'—':eurShort(reqWeekly)}</span></div>
+    <div class="metric-row"><span class="metric-label">SAO Gap to Q1 Target</span><span class="metric-val">${saoGapQ1<=0?'On track!':saoGapQ1+' needed'}</span></div>
+  `;
+
+  // Sparklines
+  drawSparkline('myPipeChart', SDR_WEEK_HISTORY[name]||[], '#0F4C81', v=>eur(v));
+  drawSparkline('myActChart', SDR_ACT_HISTORY[name]||[], '#F18F01', v=>fmtNum(v));
+}
+
+function drawSparkline(canvasId, data, color, fmt) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 36;
+  const h = 150;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+
+  if (!data.length) { ctx.fillStyle='#94a3b8'; ctx.font='12px DM Sans'; ctx.fillText('No data yet',w/2-30,h/2); return; }
+
+  const max = Math.max(...data, 1);
+  const pad = {t:22,b:28,l:16,r:14};
+  const plotW = w - pad.l - pad.r;
+  const plotH = h - pad.t - pad.b;
+  const step = data.length > 1 ? plotW / (data.length - 1) : plotW;
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t + plotH);
+  data.forEach((v,i) => {
+    const x = pad.l + i * step;
+    const y = pad.t + plotH - (v/max)*plotH;
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad.l + (data.length-1)*step, pad.t + plotH);
+  ctx.closePath();
+  ctx.fillStyle = color + '18';
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  data.forEach((v,i) => {
+    const x = pad.l + i * step;
+    const y = pad.t + plotH - (v/max)*plotH;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots + labels
+  data.forEach((v,i) => {
+    const x = pad.l + i * step;
+    const y = pad.t + plotH - (v/max)*plotH;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  });
+
+  // Week labels
+  ctx.fillStyle = '#94a3b8'; ctx.font = '9px DM Sans'; ctx.textAlign = 'center';
+  data.forEach((_,i) => { ctx.fillText('W'+(i+1), pad.l + i*step, h - 8); });
+
+  // Last value label — render below dot if near top
+  const lastX = pad.l + (data.length-1)*step;
+  const lastY = pad.t + plotH - (data[data.length-1]/max)*plotH;
+  ctx.fillStyle = color; ctx.font = 'bold 11px DM Sans'; ctx.textAlign = 'right';
+  if (lastY < pad.t + 16) {
+    ctx.fillText(fmt(data[data.length-1]), lastX - 6, lastY + 16);
+  } else {
+    ctx.fillText(fmt(data[data.length-1]), lastX - 6, lastY - 8);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// RENDER: HIGHLIGHTS
+// ════════════════════════════════════════════════════════════
+document.getElementById('highlights').innerHTML = HIGHLIGHTS.map(h => `
+  <div class="highlight-card">
+    <div class="highlight-emoji">${h.emoji}</div>
+    <div class="highlight-name">${h.name}</div>
+    <div class="highlight-title">${h.title}</div>
+    <div class="highlight-stat">${h.stat}</div>
+    <div class="highlight-detail">${h.detail}</div>
+  </div>
+`).join('');
+
+// ════════════════════════════════════════════════════════════
+// RENDER: BU STARS (auto-generated)
+// ════════════════════════════════════════════════════════════
+(function renderBUStars() {
+  const buEmojis = {
+    DACH_ENT_OB:'🏔️', DACH_CORP_OB:'⚡', EMEA_OB:'🌍',
+    AMER_OB:'🇺🇸', APJ_OB:'🌏', INBOUND:'📥'
+  };
+
+  const stars = ALL_BUS.map(bu => {
+    const buSDRs = SDRS.filter(s => s.bu === bu && s.pipeQ1 > 0);
+    if (!buSDRs.length) return null;
+
+    // Find top performer by single-week pipeline % of Q1 target
+    let best = null, bestPct = -1;
+    buSDRs.forEach(s => {
+      const h = SDR_WEEK_HISTORY[s.name];
+      const weekPipe = h ? h[h.length-1] : 0;
+      const weekPct = weekPipe / s.pipeQ1 * 100;
+      if (weekPct > bestPct) { bestPct = weekPct; best = s; }
+    });
+
+    if (!best) return null;
+    const h = SDR_WEEK_HISTORY[best.name];
+    const weekPipe = h ? h[h.length-1] : 0;
+    const weekSaoH = SDR_SAO_HISTORY[best.name];
+    const weekSAOs = weekSaoH ? weekSaoH[weekSaoH.length-1] : 0;
+    const weekAct = LAST_WEEK_ACTS[best.name] || 0;
+
+    // Build a concise detail line
+    let detail = '';
+    if (weekPipe > 0 && weekSAOs > 0) detail = `+${eur(weekPipe)} pipeline & ${weekSAOs} SAO${weekSAOs>1?'s':''} this week. ${fmtNum(weekAct)} activities.`;
+    else if (weekPipe > 0) detail = `+${eur(weekPipe)} pipeline this week. ${fmtNum(weekAct)} activities.`;
+    else if (weekSAOs > 0) detail = `${weekSAOs} SAO${weekSAOs>1?'s':''} this week. ${fmtNum(weekAct)} activities.`;
+    else detail = `${fmtNum(weekAct)} activities this week. Building momentum.`;
+
+    const firstName = best.name.split(' ')[0];
+    const lastInitial = best.name.split(' ').pop()[0];
+
+    return {
+      emoji: buEmojis[bu] || '⭐',
+      buLabel: (BU_META[bu]||{}).short || bu,
+      name: firstName + ' ' + lastInitial + '.',
+      pct: Math.round(bestPct),
+      stat: weekPipe > 0 ? '+' + eur(weekPipe) : weekSAOs + ' SAOs',
+      detail: detail
+    };
+  }).filter(Boolean);
+
+  document.getElementById('buStars').innerHTML = stars.map(s => `
+    <div class="highlight-card bu-star">
+      <div class="highlight-emoji">${s.emoji}</div>
+      <div class="highlight-name">${s.buLabel}</div>
+      <div class="highlight-title">${s.name}</div>
+      <div class="highlight-stat">${s.stat}</div>
+      <div class="highlight-detail">${s.detail}</div>
+    </div>
+  `).join('');
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: LEADERBOARDS
+// ════════════════════════════════════════════════════════════
+(function renderLeaderboards() {
+  // Pipeline this week — sorted by % of Q1 target
+  const pipeWeek = SDRS.filter(s=>s.pipeQ1>0).map(s => {
+    const h = SDR_WEEK_HISTORY[s.name];
+    const val = h ? h[h.length-1] : 0;
+    return { name: s.name, bu: s.bu, val, pct: val/s.pipeQ1*100 };
+  }).sort((a,b)=>b.pct-a.pct).slice(0,7);
+
+  // Activity this week — sorted by % of 500 baseline (weekly)
+  const actWeek = SDRS.map(s => {
+    const val = LAST_WEEK_ACTS[s.name]||0;
+    return { name: s.name, bu: s.bu, val, pct: val/500*100 };
+  }).sort((a,b)=>b.pct-a.pct).slice(0,7);
+
+  // SAOs this week — sorted by % of Q1 target
+  const saoWeek = SDRS.filter(s=>s.saoQ1>0).map(s => {
+    const h = SDR_SAO_HISTORY[s.name];
+    const val = h ? h[h.length-1] : 0;
+    return { name: s.name, bu: s.bu, val, pct: val/s.saoQ1*100 };
+  }).sort((a,b)=>b.pct-a.pct).slice(0,7);
+
+  // Cumulative pipeline — sorted by % of Q1 target
+  const pipeCum = SDRS.filter(s=>s.pipeQ1>0).map(s=>({
+    name:s.name, bu:s.bu, val:s.pipe, pct:s.pipe/s.pipeQ1*100
+  })).sort((a,b)=>b.pct-a.pct).slice(0,7);
+
+  function renderLB(title, items, fmtVal) {
+    const rankCls = i => i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+    return `<div class="lb-card"><h3>${title}</h3>${items.map((it,i) => `
+      <div class="lb-row">
+        <div class="lb-rank ${rankCls(i)}">${i+1}</div>
+        <div class="lb-name">${it.name}</div>
+        <div class="lb-bu">${(BU_META[it.bu]||{}).short||''}</div>
+        <div class="lb-pct">${Math.round(it.pct)}%</div>
+        <div class="lb-val">${fmtVal(it.val)}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  document.getElementById('leaderboards').innerHTML =
+    renderLB('💰 Pipeline This Week', pipeWeek, eur) +
+    renderLB('📞 Activity This Week', actWeek, fmtNum) +
+    renderLB('🎯 SAOs This Week', saoWeek, v=>v) +
+    renderLB('📊 Cumulative Pipeline', pipeCum, eur);
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: FOCUS OF THE WEEK
+// ════════════════════════════════════════════════════════════
+(function renderFocus() {
+  const snap = WEEK_HISTORY[WEEK_HISTORY.length-1];
+  const currentPipe = ALL_BUS.reduce((s,b)=>s+(snap[b]||{}).pipe||0,0);
+  const q1Target = SDRS.reduce((s,d)=>s+d.pipeQ1,0);
+  const nSDRs = SDRS.length;
+  const WR = WEEK.weeksRemaining;
+
+  // Split SDRs: above 500 avg maintain, below 500 uplift to 500
+  let projectedNewPipe = 0;
+  let aboveCount = 0, belowCount = 0;
+
+  SDRS.forEach(s => {
+    const weeklyAvg = s.acts / WE;
+    // Per-SDR conversion: their pipeline per activity
+    const convRate = s.acts > 0 ? s.pipe / s.acts : 0;
+
+    if (weeklyAvg >= 500) {
+      // Maintain current pace
+      aboveCount++;
+      projectedNewPipe += weeklyAvg * WR * convRate;
+    } else {
+      // Uplift to 500
+      belowCount++;
+      projectedNewPipe += 500 * WR * convRate;
+    }
+  });
+
+  const projectedTotal = currentPipe + projectedNewPipe;
+  const projectedPct = q1Target > 0 ? projectedTotal / q1Target * 100 : 0;
+
+  document.getElementById('focusBox').innerHTML = `
+    <div class="focus-box">
+      <div class="focus-title">📣 Focus of the Week</div>
+      <div class="focus-text">
+        Right now, <span class="focus-stat">${aboveCount}</span> of us are averaging 500+ activities per week — keep that momentum going.
+        If the remaining <span class="focus-stat">${belowCount}</span> step up to the <span class="focus-stat">500 baseline</span> for the next
+        <span class="focus-stat">${WR} weeks</span>, current conversion rates project an additional
+        <span class="focus-stat">${eur(Math.round(projectedNewPipe))}</span> in pipeline — bringing our global total to
+        <span class="focus-stat">${eur(Math.round(projectedTotal))}</span>
+        (<span class="focus-stat">${Math.round(projectedPct)}%</span> of our Q1 target).
+        The activity is in our hands. Every call, every LinkedIn touch, every email counts. Let's finish strong.
+      </div>
+    </div>
+  `;
+})();
+
+// ════════════════════════════════════════════════════════════
+// RENDER: TEAM TREND CHARTS
+// ════════════════════════════════════════════════════════════
+function renderBarChart(canvasId, legendId, metric) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 36;
+  const h = 220;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+
+  const nWeeks = WEEK_HISTORY.length;
+  const busToShow = ALL_BUS;
+
+  // Compute weekly increments per BU
+  const weekData = [];
+  for (let i=0; i<nWeeks; i++) {
+    const entry = {};
+    busToShow.forEach(bu => {
+      const cur = (WEEK_HISTORY[i][bu]||{})[metric] || 0;
+      const prev = i>0 ? ((WEEK_HISTORY[i-1][bu]||{})[metric] || 0) : 0;
+      entry[bu] = Math.max(0, cur - prev);
+    });
+    weekData.push(entry);
+  }
+
+  // For activity metric, sum from SDR_ACT_HISTORY instead
+  if (metric === 'acts') {
+    for (let i=0; i<nWeeks; i++) {
+      busToShow.forEach(bu => { weekData[i][bu] = 0; });
+      SDRS.forEach(s => {
+        const h = SDR_ACT_HISTORY[s.name];
+        if (h && h[i] !== undefined) weekData[i][s.bu] = (weekData[i][s.bu]||0) + h[i];
+      });
+    }
+  }
+
+  // Stack totals
+  const stackTotals = weekData.map(wd => busToShow.reduce((s,bu)=>s+(wd[bu]||0),0));
+  const maxStack = Math.max(...stackTotals, 1);
+
+  const pad = {t:10,b:24,l:55,r:10};
+  const plotW = w - pad.l - pad.r;
+  const plotH = h - pad.t - pad.b;
+  const barW = Math.min(40, plotW/nWeeks * 0.7);
+  const gap = (plotW - barW*nWeeks) / (nWeeks + 1);
+
+  // Y gridlines
+  const nGrid = 4;
+  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.5;
+  ctx.fillStyle = '#94a3b8'; ctx.font = '10px DM Sans'; ctx.textAlign = 'right';
+  for (let i=0; i<=nGrid; i++) {
+    const y = pad.t + plotH - (i/nGrid)*plotH;
+    const val = (maxStack * i / nGrid);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w-pad.r, y); ctx.stroke();
+    const label = metric==='acts' ? fmtNum(Math.round(val)) : eur(val);
+    ctx.fillText(label, pad.l-6, y+4);
+  }
+
+  // Bars
+  for (let wi=0; wi<nWeeks; wi++) {
+    const x = pad.l + gap + wi*(barW+gap);
+    let yBottom = pad.t + plotH;
+    busToShow.forEach(bu => {
+      const val = weekData[wi][bu] || 0;
+      const barH = (val/maxStack)*plotH;
+      ctx.fillStyle = BU_META[bu].color;
+      ctx.beginPath();
+      ctx.roundRect(x, yBottom-barH, barW, barH, [2,2,0,0]);
+      ctx.fill();
+      yBottom -= barH;
+    });
+
+    // Week label
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px DM Sans'; ctx.textAlign = 'center';
+    ctx.fillText('W'+(wi+1), x+barW/2, h-6);
+  }
+
+  // Legend
+  document.getElementById(legendId).innerHTML = busToShow.map(bu =>
+    `<span style="--c:${BU_META[bu].color}"><span style="background:${BU_META[bu].color};width:10px;height:10px;border-radius:2px;display:inline-block"></span> ${BU_META[bu].short}</span>`
+  ).join('');
+}
+
+document.fonts.ready.then(() => {
+  renderBarChart('pipeBarChart', 'pipeChartLegend', 'pipe');
+  renderBarChart('actBarChart', 'actChartLegend', 'acts');
+});
+
+// Footer
+document.getElementById('footer').textContent = 'Data as of ' + fmtDate(WEEK.ending) + ' · SDR Team Scoreboard · Q1 FY26';
+</script>
+</body>
+</html>
